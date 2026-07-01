@@ -2,10 +2,12 @@ import { City } from './city.js';
 import { STAGES, STORY_TITLE, STORY_INTRO, getStage } from './stages.js';
 import { SerialLink, parseEventLine } from './serial.js';
 import { Story } from './story.js';
+import { AudioEngine } from './audio.js';
 
 const canvas = document.getElementById('city-canvas');
 const city = new City(canvas);
 const story = new Story();
+const audio = new AudioEngine();
 
 const el = {
   connectBtn: document.getElementById('connect-btn'),
@@ -25,12 +27,17 @@ const el = {
   resetBtn: document.getElementById('reset-btn'),
   storyTitle: document.getElementById('story-title'),
   storyIntro: document.getElementById('story-intro'),
+  muteBtn: document.getElementById('mute-btn'),
+  splash: document.getElementById('splash'),
+  splashStart: document.getElementById('splash-start'),
+  cinematicLayer: document.getElementById('cinematic-layer'),
 };
 
 el.storyTitle.textContent = STORY_TITLE;
 el.storyIntro.textContent = STORY_INTRO;
 
 let link = null;
+let muted = false;
 
 function logLine(text) {
   const line = document.createElement('div');
@@ -42,6 +49,7 @@ function logLine(text) {
 }
 
 function toast(message, kind = 'info') {
+  while (el.toast.children.length >= 4) el.toast.removeChild(el.toast.firstChild);
   const node = document.createElement('div');
   node.className = `toast-msg toast-${kind}`;
   node.textContent = message;
@@ -51,6 +59,28 @@ function toast(message, kind = 'info') {
     node.classList.remove('show');
     setTimeout(() => node.remove(), 400);
   }, 4200);
+}
+
+// Bigger, cinematic "stage complete" moment — plays over the city canvas
+// itself, in sync with the camera pushing in on the system that just came online.
+function playStageBanner(stage) {
+  el.cinematicLayer.querySelectorAll('.cine-banner').forEach((n) => n.remove());
+  const node = document.createElement('div');
+  node.className = 'cine-banner';
+  node.innerHTML = `
+    <div class="cine-icon">${stage.icon}</div>
+    <div class="cine-text">
+      <div class="cine-kicker">Bosqich ${String(stage.id).padStart(2, '0')} tugallandi</div>
+      <div class="cine-title">${stage.title}</div>
+      <div class="cine-desc">${stage.story.complete}</div>
+    </div>
+  `;
+  el.cinematicLayer.appendChild(node);
+  requestAnimationFrame(() => node.classList.add('show'));
+  setTimeout(() => {
+    node.classList.remove('show');
+    setTimeout(() => node.remove(), 500);
+  }, 3400);
 }
 
 function renderStageList() {
@@ -65,12 +95,14 @@ function renderStageList() {
       (stage.id === story.current ? ' is-current' : '');
     item.disabled = !unlocked;
     item.innerHTML = `
+      <span class="stage-icon">${unlocked ? stage.icon : '🔒'}</span>
       <span class="stage-num">${String(stage.id).padStart(2, '0')}</span>
       <span class="stage-name">${stage.title}</span>
-      <span class="stage-mark">${completed ? '✔' : unlocked ? '' : '🔒'}</span>
+      <span class="stage-mark">${completed ? '✔' : ''}</span>
     `;
     item.addEventListener('click', () => {
       if (!unlocked) return;
+      audio.blip();
       story.setCurrent(stage.id);
       renderAll();
     });
@@ -80,7 +112,7 @@ function renderStageList() {
 
 function renderStagePanel() {
   const stage = getStage(story.current);
-  el.stageTitle.textContent = `${String(stage.id).padStart(2, '0')} · ${stage.title}`;
+  el.stageTitle.textContent = `${stage.icon} ${String(stage.id).padStart(2, '0')} · ${stage.title}`;
   el.stageSubtitle.textContent = stage.subtitle;
   el.stageComponents.innerHTML = stage.components.map((c) => `<li>${c}</li>`).join('');
   el.stageWiring.innerHTML = stage.wiring.map((w) => `<li>${w}</li>`).join('');
@@ -101,6 +133,33 @@ function renderAll() {
   renderProgress();
 }
 
+function playSpecialSfx(stage, payload) {
+  switch (stage.id) {
+    case 4:
+      audio.siren(payload === '1');
+      break;
+    case 9:
+      if (city.state.lightningFlash > 0.9) audio.thunder();
+      break;
+    case 10:
+      if (payload === '1') audio.quake();
+      break;
+    case 13:
+    case 14:
+      if (payload === '1') audio.splash();
+      break;
+    case 17:
+      if (payload === 'LAUNCH') audio.launch();
+      break;
+    case 20:
+      if (payload === 'SIREN') audio.siren(true);
+      if (payload === 'VICTORY') { audio.siren(false); audio.victory(); }
+      break;
+    default:
+      break;
+  }
+}
+
 function handleEvent(id, payload) {
   const stage = getStage(id);
   if (!stage) return;
@@ -109,17 +168,23 @@ function handleEvent(id, payload) {
     return;
   }
   stage.parse(payload, city);
+  audio.blip();
+  playSpecialSfx(stage, payload);
+
   if (stage.isComplete(city.state) && !story.isCompleted(id)) {
     story.markComplete(id);
-    toast(stage.story.complete, 'success');
+    audio.success();
+    city.focusOn(stage.focus.x, stage.focus.y, stage.focus.zoom);
+    playStageBanner(stage);
     if (id === STAGES.length) {
-      setTimeout(() => toast('Barcha 20 bosqich tugallandi. Nurshahar butunlay tiklandi!', 'success'), 800);
+      setTimeout(() => toast('Barcha 20 bosqich tugallandi. Nurshahar butunlay tiklandi!', 'success'), 1200);
     }
   }
   renderAll();
 }
 
 el.connectBtn.addEventListener('click', async () => {
+  audio.ensure();
   if (!SerialLink.isSupported()) {
     toast('Bu brauzer Web Serial ni qo\'llab-quvvatlamaydi. Google Chrome yoki Microsoft Edge dan foydalaning.', 'error');
     return;
@@ -150,6 +215,7 @@ el.disconnectBtn.addEventListener('click', async () => {
 });
 
 el.simulateBtn.addEventListener('click', () => {
+  audio.ensure();
   const stage = getStage(story.current);
   const sample = SIMULATED_PAYLOADS[stage.id];
   logLine(`(simulyatsiya) EVT:${stage.id}:${sample}`);
@@ -160,6 +226,19 @@ el.resetBtn.addEventListener('click', () => {
   if (!confirm('Butun progress tozalansinmi?')) return;
   story.reset();
   renderAll();
+});
+
+el.muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  audio.setMuted(muted);
+  el.muteBtn.textContent = muted ? '🔇' : '🔊';
+});
+
+el.splashStart.addEventListener('click', () => {
+  audio.ensure();
+  audio.blip();
+  el.splash.classList.add('hidden');
+  setTimeout(() => el.splash.remove(), 700);
 });
 
 // Representative "next" payload for the simulate button, so the story can be
@@ -174,7 +253,7 @@ const SIMULATED_PAYLOADS = {
 // satisfying demo of the dual-key mechanic.
 const originalHandle19 = STAGES.find((s) => s.id === 19).parse;
 STAGES.find((s) => s.id === 19).parse = function (payload, cityRef) {
-  const r1 = originalHandle19('A1', cityRef);
+  originalHandle19('A1', cityRef);
   originalHandle19('B1', cityRef);
   return true;
 };

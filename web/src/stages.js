@@ -16,6 +16,8 @@ export const STAGES = [
   {
     id: 1,
     key: 'control_key',
+    icon: '💡',
+    focus: { x: 150, y: 380, zoom: 2.1 },
     title: 'Markaziy nazorat kaliti',
     subtitle: "Tugma bosilganda LED yonadi — shahar boshqaruv markazi qayta ishga tushadi.",
     components: ['Arduino Uno', '1x Push-button', '1x LED (sariq)', '1x 220Ω rezistor', 'Simlar'],
@@ -38,6 +40,8 @@ export const STAGES = [
   {
     id: 2,
     key: 'light_dimmer',
+    icon: '🔆',
+    focus: { x: 500, y: 400, zoom: 1.4 },
     title: "Yorug'lik boshqaruvi",
     subtitle: 'Potentsiometr bilan LED yorqinligini boshqar — mavze yorug\'ligi shunga mos o\'zgaradi.',
     components: ['Arduino Uno', '1x Potentsiometr (10k)', '1x LED', '1x 220Ω rezistor'],
@@ -60,6 +64,8 @@ export const STAGES = [
   {
     id: 3,
     key: 'auto_streetlamp',
+    icon: '🌙',
+    focus: { x: 350, y: 450, zoom: 1.8 },
     title: "Avtomatik ko'cha chirog'i",
     subtitle: "Fotorezistor (LDR) qorong'ilikni sezib, ko'cha chiroqlarini avtomatik yoqadi.",
     components: ['Arduino Uno', '1x LDR (fotorezistor)', '1x 10k rezistor', '1x LED'],
@@ -82,6 +88,8 @@ export const STAGES = [
   {
     id: 4,
     key: 'siren',
+    icon: '🚨',
+    focus: { x: 300, y: 220, zoom: 2.3 },
     title: 'Ogohlantirish signali',
     subtitle: "Buzzer orqali shahar sirenasini yoq — meteor yaqinlashayotgani haqida ogohlantirish.",
     components: ['Arduino Uno', '1x Passiv buzzer', '1x Push-button'],
@@ -104,6 +112,8 @@ export const STAGES = [
   {
     id: 5,
     key: 'traffic_light',
+    icon: '🚦',
+    focus: { x: 340, y: 460, zoom: 2.1 },
     title: 'Svetofor tizimi',
     subtitle: "RGB LED qizil-sariq-yashil tartibida yonib, yo'l harakatini boshqaradi.",
     components: ['Arduino Uno', '1x RGB LED (umumiy katod)', '3x 220Ω rezistor'],
@@ -127,6 +137,8 @@ export const STAGES = [
   {
     id: 6,
     key: 'bridge_gate',
+    icon: '🌉',
+    focus: { x: 800, y: 480, zoom: 1.8 },
     title: "Ko'prik darvozasi",
     subtitle: 'Servo motor ko\'prik darvozasini ochadi — kemalar o\'tishi mumkin.',
     components: ['Arduino Uno', '1x Servo motor (SG90)', '1x Potentsiometr (ixtiyoriy)'],
@@ -149,6 +161,8 @@ export const STAGES = [
   {
     id: 7,
     key: 'shield_wall',
+    icon: '🛡️',
+    focus: { x: 520, y: 300, zoom: 1.5 },
     title: 'Himoya devori (Shield)',
     subtitle: 'Ultratovush sensor (HC-SR04) masofani o\'lchab, meteor yaqinlashganda himoya maydonini yoqadi.',
     components: ['Arduino Uno', '1x HC-SR04 ultratovush sensor'],
@@ -173,6 +187,8 @@ export const STAGES = [
   {
     id: 8,
     key: 'security_watch',
+    icon: '🎥',
+    focus: { x: 150, y: 180, zoom: 2.1 },
     title: 'Xavfsizlik nazorati',
     subtitle: 'PIR harakat sensori odam/harakatni sezganda qo\'riqlash minorasi yoriti sochib boshlaydi.',
     components: ['Arduino Uno', '1x PIR harakat sensori (HC-SR501)'],
@@ -195,6 +211,8 @@ export const STAGES = [
   {
     id: 9,
     key: 'weather_station',
+    icon: '⛈️',
+    focus: { x: 670, y: 150, zoom: 1.8 },
     title: 'Ob-havo stansiyasi',
     subtitle: 'DHT11 harorat sensori orqali atmosfera holatini kuzatib, chaqmoq bo\'ronini bashorat qil.',
     components: ['Arduino Uno', '1x DHT11 harorat/namlik sensori'],
@@ -218,6 +236,8 @@ export const STAGES = [
   {
     id: 10,
     key: 'quake_sensor',
+    icon: '🌍',
+    focus: { x: 500, y: 470, zoom: 1.15 },
     title: 'Zilzila sensori',
     subtitle: 'Tebranish sensori (SW-420) zarba/tebranishni sezib, yer qimirlashini aniqlaydi.',
     components: ['Arduino Uno', '1x SW-420 tebranish (vibration) sensori'],
@@ -243,6 +263,8 @@ export const STAGES = [
   {
     id: 11,
     key: 'fire_alarm',
+    icon: '🔥',
+    focus: { x: 608, y: 360, zoom: 1.8 },
     title: 'Yong\'in signalizatsiyasi',
     subtitle: "Alanga (flame) sensori yong'inni aniqlaydi — o'chirilgach bino xavfsiz bo'ladi.",
     components: ['Arduino Uno', '1x Flame/IR alanga sensori', '1x LED (qizil)'],
@@ -265,6 +287,8 @@ export const STAGES = [
   {
     id: 12,
     key: 'gas_leak',
+    icon: '🏭',
+    focus: { x: 765, y: 390, zoom: 1.8 },
     title: 'Gaz oqishi nazorati',
     subtitle: 'MQ-2 gaz/tutun sensori zavod hududidagi gaz oqishini nazorat qiladi va shamollatish tizimini yoqadi.',
     components: ['Arduino Uno', '1x MQ-2 gaz sensori'],
@@ -288,6 +312,8 @@ export const STAGES = [
   {
     id: 13,
     key: 'clap_fountain',
+    icon: '⛲',
+    focus: { x: 200, y: 396, zoom: 2.0 },
     title: 'Ovozli boshqaruv (favvora)',
     subtitle: 'Ovoz sensori qarsakni eshitib, bog\'dagi favvorani yoqadi.',
     components: ['Arduino Uno', '1x Ovoz/mikrofon sensori (KY-038 va h.k.)'],
@@ -311,6 +337,8 @@ export const STAGES = [
   {
     id: 14,
     key: 'rain_guard',
+    icon: '🌧️',
+    focus: { x: 430, y: 360, zoom: 1.8 },
     title: "Yomg'ir nazorati",
     subtitle: "Yomg'ir sensori suv tomchisini his qilib, stadion tomini yopadi.",
     components: ['Arduino Uno', '1x Yomg\'ir (rain) sensori'],
@@ -334,6 +362,8 @@ export const STAGES = [
   {
     id: 15,
     key: 'vault_door',
+    icon: '🔐',
+    focus: { x: 445, y: 445, zoom: 2.0 },
     title: 'Xavfsiz eshik (Vault)',
     subtitle: 'Magnit (reed) sensor yordamida markaziy quvvat omboriga eshikni ochasan.',
     components: ['Arduino Uno', '1x Reed switch (magnit sensor)', '1x kichik magnit'],
@@ -356,6 +386,8 @@ export const STAGES = [
   {
     id: 16,
     key: 'radar_control',
+    icon: '📡',
+    focus: { x: 860, y: 280, zoom: 1.6 },
     title: 'Radar boshqaruvi',
     subtitle: 'Joystick modul yordamida radar antennasini aylantirib, osmondagi meteorlarni qidir.',
     components: ['Arduino Uno', '1x Joystick modul (KY-023)'],
@@ -378,6 +410,8 @@ export const STAGES = [
   {
     id: 17,
     key: 'launch_countdown',
+    icon: '🚀',
+    focus: { x: 520, y: 190, zoom: 2.0 },
     title: 'Uchirish (countdown) taymeri',
     subtitle: "7-segment displey orqali himoya sun'iy yo'ldoshi uchirilishi uchun teskari sanoq boshlanadi.",
     components: ['Arduino Uno', '1x 7-segment displey (yoki 4ta LED raqam o\'rnida)', '1x Push-button'],
@@ -407,6 +441,8 @@ export const STAGES = [
   {
     id: 18,
     key: 'remote_center',
+    icon: '🎛️',
+    focus: { x: 520, y: 300, zoom: 1.2 },
     title: 'Masofadan boshqaruv markazi',
     subtitle: 'IR pult yordamida bir nechta shahar tizimini masofadan boshqar.',
     components: ['Arduino Uno', '1x IR qabul qiluvchi (VS1838B)', '1x IR pult'],
@@ -429,6 +465,8 @@ export const STAGES = [
   {
     id: 19,
     key: 'dual_key_core',
+    icon: '🔑',
+    focus: { x: 520, y: 430, zoom: 2.0 },
     title: 'Yadro reaktori — ikki kalitli xavfsizlik',
     subtitle: "Ikkita tugma bir vaqtda bosilgandagina reaktor eshigi ochiladi (ikki kishilik xavfsizlik qoidasi).",
     components: ['Arduino Uno', '2x Push-button', '2x LED'],
@@ -454,6 +492,8 @@ export const STAGES = [
   {
     id: 20,
     key: 'final_defense',
+    icon: '☄️',
+    focus: { x: 600, y: 280, zoom: 1.3 },
     title: 'Yakuniy himoya — Shahar yadrosi',
     subtitle: "Barcha sensorlar birlashadi: LDR (meteor yorqinligi), tugma (himoya), buzzer (sirena), servo (himoya darvozasi), RGB (signal) — meteor hujumini birgalikda qaytaring.",
     components: ['Arduino Uno', '1x LDR', '1x Push-button', '1x Buzzer', '1x Servo', '1x RGB LED', 'Avvalgi barcha qismlar'],

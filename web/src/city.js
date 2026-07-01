@@ -1,6 +1,9 @@
 // Nurshahar (Light City) renderer — a single persistent canvas scene that
 // grows brighter and more alive as each of the 20 Arduino stages comes online.
-// Pure Canvas2D, no assets, no build step.
+// Pure Canvas2D, no assets, no build step. Includes a lightweight cinematic
+// camera (pan/zoom focus on whatever system just activated), eased state
+// transitions instead of instant snaps, and layered glow/atmosphere for a
+// more premium look.
 
 const W = 1000;
 const H = 600;
@@ -13,6 +16,11 @@ function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
 
+function easeLerp(current, target, factor) {
+  if (Math.abs(target - current) < 0.0005) return target;
+  return lerp(current, target, factor);
+}
+
 export class City {
   constructor(canvas) {
     this.canvas = canvas;
@@ -22,7 +30,18 @@ export class City {
     window.addEventListener('resize', () => this._resize());
 
     this.t0 = performance.now();
-    this.particles = []; // generic particle pool: {x,y,vx,vy,life,maxLife,color,r,kind}
+    this.particles = []; // {x,y,vx,vy,life,maxLife,color,r,kind}
+
+    this.camera = { x: 500, y: 300, zoom: 1 };
+    this.cameraTarget = { x: 500, y: 300, zoom: 1 };
+    this._focusTimer = null;
+
+    this.clouds = Array.from({ length: 4 }, (_, i) => ({
+      x: i * 320 + Math.random() * 200,
+      y: 40 + Math.random() * 90,
+      scale: 0.7 + Math.random() * 0.9,
+      speed: 2.5 + Math.random() * 3,
+    }));
 
     this.state = {
       controlKeyOn: false, // stage 1
@@ -53,7 +72,14 @@ export class City {
       reactorOpen: false, // stage 19
       finalVictory: false, // stage 20
       fireworks: 0, // stage 20 transient timer
-      globalProgress: 0, // 0..1, count of completed stages / 20
+      globalProgress: 0, // 0..1
+    };
+
+    // Smoothed mirrors: continuous values ease toward state, booleans fade as 0..1 glow.
+    this.display = { brightness: 0, bridgeOpen: 0, radarAngle: this.state.radarAngle, asteroidDistance: 1, fireLevel: 1 };
+    this.glow = {
+      controlKeyOn: 0, autoLampsOn: 0, sirenOn: 0, trafficOn: 0, securityOn: 0,
+      gasClear: 0, fountainOn: 0, rainOn: 0, vaultOpen: 0, reactorOpen: 0, shieldOn: 0,
     };
 
     this._raf = requestAnimationFrame((t) => this._tick(t));
@@ -90,6 +116,16 @@ export class City {
   triggerRemoteBlink() { this.state.remoteBlink = 1; }
   triggerFireworks() { this.state.fireworks = 1; }
 
+  // Cinematic camera: smoothly push in on (x,y) at the given zoom, hold, then
+  // ease back out to the full overview. Called when a stage comes online.
+  focusOn(x, y, zoom = 1.9, holdMs = 2400) {
+    this.cameraTarget = { x, y, zoom };
+    clearTimeout(this._focusTimer);
+    this._focusTimer = setTimeout(() => {
+      this.cameraTarget = { x: 500, y: 300, zoom: 1 };
+    }, holdMs);
+  }
+
   _tick(now) {
     const dt = 16.7;
     const time = (now - this.t0) / 1000;
@@ -100,6 +136,26 @@ export class City {
 
   _update(time, dt) {
     const s = this.state;
+
+    // camera easing
+    const camSpeed = this.cameraTarget.zoom > this.camera.zoom ? 0.07 : 0.045;
+    this.camera.x = easeLerp(this.camera.x, this.cameraTarget.x, camSpeed);
+    this.camera.y = easeLerp(this.camera.y, this.cameraTarget.y, camSpeed);
+    this.camera.zoom = easeLerp(this.camera.zoom, this.cameraTarget.zoom, camSpeed);
+
+    // continuous value smoothing
+    this.display.brightness = easeLerp(this.display.brightness, s.brightness, 0.05);
+    this.display.bridgeOpen = easeLerp(this.display.bridgeOpen, s.bridgeOpen, 0.06);
+    this.display.radarAngle = easeLerp(this.display.radarAngle, s.radarAngle, 0.12);
+    this.display.asteroidDistance = easeLerp(this.display.asteroidDistance, s.asteroidDistance, 0.05);
+    this.display.fireLevel = easeLerp(this.display.fireLevel, s.fireLevel, 0.02);
+
+    // boolean glow fades
+    for (const key of Object.keys(this.glow)) {
+      const target = s[key] ? 1 : 0;
+      this.glow[key] = easeLerp(this.glow[key], target, 0.08);
+    }
+
     if (s.lightningFlash > 0) s.lightningFlash = clamp(s.lightningFlash - dt / 260, 0, 1);
     if (s.quakeShake > 0) s.quakeShake = clamp(s.quakeShake - dt / 1400, 0, 1);
     if (s.remoteBlink > 0) s.remoteBlink = clamp(s.remoteBlink - dt / 900, 0, 1);
@@ -138,6 +194,22 @@ export class City {
       if (p.kind === 'smoke') p.r += 0.03;
     }
     this.particles = this.particles.filter((p) => p.life < p.maxLife);
+
+    for (const c of this.clouds) {
+      c.x += c.speed * (dt / 1000);
+      if (c.x > W + 200) c.x = -200;
+    }
+  }
+
+  _glowDot(x, y, radius, color, alpha) {
+    const ctx = this.ctx;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    g.addColorStop(0, color.replace('ALPHA', alpha.toFixed(3)));
+    g.addColorStop(1, color.replace('ALPHA', '0'));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 7);
+    ctx.fill();
   }
 
   _draw(time) {
@@ -146,6 +218,11 @@ export class City {
     ctx.save();
     ctx.scale(this.dpr * this.scale, this.dpr * this.scale);
 
+    // camera transform (pan/zoom)
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(this.camera.zoom, this.camera.zoom);
+    ctx.translate(-this.camera.x, -this.camera.y);
+
     let shakeX = 0, shakeY = 0;
     if (s.quakeShake > 0) {
       shakeX = (Math.random() - 0.5) * 10 * s.quakeShake;
@@ -153,8 +230,9 @@ export class City {
     }
     ctx.translate(shakeX, shakeY);
 
-    const night = 1 - clamp(s.globalProgress * 0.55 + s.brightness * 0.35, 0, 0.85);
+    const night = 1 - clamp(s.globalProgress * 0.55 + this.display.brightness * 0.35, 0, 0.85);
     this._drawSky(time, night);
+    this._drawClouds(night);
     this._drawAsteroids(time);
     this._drawGround(time);
     this._drawResidential(time);
@@ -173,22 +251,51 @@ export class City {
 
     if (s.lightningFlash > 0) {
       ctx.fillStyle = `rgba(220,230,255,${0.5 * s.lightningFlash})`;
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(this.camera.x - W, this.camera.y - H, W * 2, H * 2);
     }
     if (s.quakeShake > 0) this._drawCracks(s.quakeShake);
-    if (s.finalVictory) this._drawVictoryBanner();
+
+    ctx.restore(); // end camera transform, back to screen space
+
+    this._drawVignette();
+    if (s.finalVictory) this._drawVictoryBanner(time);
 
     ctx.restore();
   }
 
-  _sky(time) {
-    return time;
+  _drawClouds(night) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.globalAlpha = 0.16 + night * 0.1;
+    ctx.fillStyle = '#c9d4ea';
+    for (const c of this.clouds) {
+      ctx.beginPath();
+      ctx.ellipse(c.x, c.y, 60 * c.scale, 16 * c.scale, 0, 0, 7);
+      ctx.ellipse(c.x + 30 * c.scale, c.y + 4, 40 * c.scale, 13 * c.scale, 0, 0, 7);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // rising moon, visible once the city has made some progress restoring power
+    const moonProgress = clamp(this.state.globalProgress * 1.4, 0, 1);
+    if (moonProgress > 0.02) {
+      const mx = 880 - moonProgress * 60;
+      const my = 90 - moonProgress * 40;
+      ctx.save();
+      ctx.globalAlpha = moonProgress;
+      this._glowDot(mx, my, 46, 'rgba(230,235,255,ALPHA)', 0.35);
+      ctx.fillStyle = '#eef1ff';
+      ctx.beginPath();
+      ctx.arc(mx, my, 16, 0, 7);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 
   _drawSky(time, night) {
     const ctx = this.ctx;
-    const top = `rgb(${lerp(8, 100, 1 - night)|0},${lerp(10, 140, 1 - night)|0},${lerp(28, 190, 1 - night)|0})`;
-    const bot = `rgb(${lerp(30, 180, 1 - night)|0},${lerp(20, 210, 1 - night)|0},${lerp(60, 230, 1 - night)|0})`;
+    const top = `rgb(${lerp(8, 100, 1 - night) | 0},${lerp(10, 140, 1 - night) | 0},${lerp(28, 190, 1 - night) | 0})`;
+    const bot = `rgb(${lerp(30, 180, 1 - night) | 0},${lerp(20, 210, 1 - night) | 0},${lerp(60, 230, 1 - night) | 0})`;
     const g = ctx.createLinearGradient(0, 0, 0, 420);
     g.addColorStop(0, top);
     g.addColorStop(1, bot);
@@ -206,14 +313,24 @@ export class City {
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+
+    // warm restored-city glow on the horizon as progress rises
+    if (this.state.globalProgress > 0.15) {
+      const glowAlpha = clamp((this.state.globalProgress - 0.15) * 0.35, 0, 0.22);
+      const hg = ctx.createLinearGradient(0, 300, 0, 460);
+      hg.addColorStop(0, `rgba(255,190,120,0)`);
+      hg.addColorStop(1, `rgba(255,170,90,${glowAlpha})`);
+      ctx.fillStyle = hg;
+      ctx.fillRect(0, 300, W, 160);
+    }
   }
 
   _drawAsteroids(time) {
     const ctx = this.ctx;
     const s = this.state;
     if (s.finalVictory) return;
-    const dist = clamp(s.asteroidDistance, 0, 1);
-    if (dist >= 1 && !s.shieldOn) return;
+    const dist = clamp(this.display.asteroidDistance, 0, 1);
+    if (dist >= 1 && this.glow.shieldOn < 0.02) return;
     const count = s.fireworks > 0 || dist < 0.35 ? 3 : 1;
     for (let i = 0; i < count; i++) {
       const seed = i * 71;
@@ -233,22 +350,24 @@ export class City {
       ctx.closePath();
       ctx.fill();
       ctx.restore();
-      // trail
-      ctx.strokeStyle = 'rgba(255,150,90,0.35)';
+      // fiery trail with glow
+      this._glowDot(x + 14, y - 14, size * 1.8, 'rgba(255,140,70,ALPHA)', 0.35);
+      ctx.strokeStyle = 'rgba(255,150,90,0.4)';
       ctx.lineWidth = size * 0.4;
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x + 40, y - 40);
       ctx.stroke();
     }
-    if (s.shieldOn) {
+    if (this.glow.shieldOn > 0.01) {
       const pulse = 0.5 + 0.5 * Math.sin(time * 4);
-      ctx.strokeStyle = `rgba(90,200,255,${0.5 + pulse * 0.4})`;
+      const a = this.glow.shieldOn;
+      ctx.strokeStyle = `rgba(90,200,255,${(0.5 + pulse * 0.4) * a})`;
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.arc(520, 300, 230, Math.PI, 2 * Math.PI);
       ctx.stroke();
-      ctx.fillStyle = `rgba(90,200,255,${0.06 + pulse * 0.05})`;
+      ctx.fillStyle = `rgba(90,200,255,${(0.06 + pulse * 0.05) * a})`;
       ctx.beginPath();
       ctx.arc(520, 300, 230, Math.PI, 2 * Math.PI);
       ctx.fill();
@@ -270,8 +389,8 @@ export class City {
       { x: 170, y: 320, w: 46, h: 140 },
       { x: 225, y: 280, w: 40, h: 180 },
     ];
-    const lit = s.controlKeyOn;
-    const bright = clamp(s.brightness, 0.06, 1);
+    const lit = this.glow.controlKeyOn;
+    const bright = clamp(this.display.brightness, 0.06, 1) * lit;
     buildings.forEach((b, bi) => {
       ctx.fillStyle = '#171b26';
       ctx.fillRect(b.x, b.y, b.w, b.h);
@@ -279,12 +398,16 @@ export class City {
       const rows = Math.floor(b.h / 16);
       for (let c = 0; c < cols; c++) {
         for (let r = 0; r < rows; r++) {
-          const on = lit && (bi !== 0 || (c + r) % 2 === 0 || bright > 0.3);
-          ctx.fillStyle = on ? `rgba(255,214,120,${bright})` : 'rgba(255,255,255,0.03)';
+          const isLitWindow = bi !== 0 || (c + r) % 2 === 0 || bright > 0.3;
+          const alpha = isLitWindow ? bright : 0;
+          ctx.fillStyle = alpha > 0.02 ? `rgba(255,214,120,${alpha})` : 'rgba(255,255,255,0.03)';
           ctx.fillRect(b.x + 4 + c * 12, b.y + 6 + r * 16, 7, 9);
         }
       }
     });
+    if (bright > 0.1) {
+      this._glowDot(150, 380, 140 * bright, 'rgba(255,200,120,ALPHA)', 0.14);
+    }
   }
 
   _drawTower(time) {
@@ -321,6 +444,7 @@ export class City {
       ctx.lineTo(528, 150 - p * 260);
       ctx.closePath();
       ctx.fill();
+      this._glowDot(520, 150 - p * 260, 14, 'rgba(255,200,120,ALPHA)', 0.5);
     }
 
     // reactor doors
@@ -330,9 +454,10 @@ export class City {
     ctx.fillStyle = '#2a3040';
     ctx.fillRect(500, 400, 20 * (1 - openAmt), 60);
     ctx.fillRect(540 - 20 * (1 - openAmt), 400, 20 * (1 - openAmt), 60);
-    if (s.reactorOpen) {
+    if (this.glow.reactorOpen > 0.01) {
       const glow = 0.5 + 0.5 * Math.sin(time * 3);
-      ctx.fillStyle = `rgba(120,255,190,${0.5 + glow * 0.4})`;
+      this._glowDot(520, 430, 30, 'rgba(120,255,190,ALPHA)', 0.4 * this.glow.reactorOpen);
+      ctx.fillStyle = `rgba(120,255,190,${(0.5 + glow * 0.4) * this.glow.reactorOpen})`;
       ctx.beginPath();
       ctx.arc(520, 430, 12, 0, 7);
       ctx.fill();
@@ -341,16 +466,13 @@ export class City {
     // vault door
     ctx.fillStyle = '#05070c';
     ctx.fillRect(430, 430, 30, 30);
-    const vaultOpen = s.vaultOpen ? 22 : 0;
+    const vaultOpen = 22 * this.glow.vaultOpen;
     ctx.fillStyle = '#232838';
     ctx.fillRect(430, 430, 30 - vaultOpen, 30);
 
     // core glow overall (reflects global progress)
     const coreGlow = 0.15 + 0.55 * s.globalProgress;
-    ctx.fillStyle = `rgba(120,200,255,${coreGlow * 0.5})`;
-    ctx.beginPath();
-    ctx.arc(520, 300, 90 * coreGlow, 0, 7);
-    ctx.fill();
+    this._glowDot(520, 300, 110 * coreGlow, 'rgba(120,200,255,ALPHA)', 0.3);
   }
 
   _drawRoad(time) {
@@ -367,6 +489,7 @@ export class City {
     ctx.setLineDash([]);
 
     // streetlamps
+    const lampOn = Math.max(this.glow.autoLampsOn, clamp((this.display.brightness - 0.5) * 2, 0, 1));
     for (let x = 60; x < 640; x += 140) {
       ctx.strokeStyle = '#2a2f3d';
       ctx.lineWidth = 3;
@@ -374,16 +497,11 @@ export class City {
       ctx.moveTo(x, 480);
       ctx.lineTo(x, 430);
       ctx.stroke();
-      const on = s.autoLampsOn || s.brightness > 0.5;
-      ctx.fillStyle = on ? 'rgba(255,224,150,0.9)' : 'rgba(255,255,255,0.08)';
-      if (on) {
-        ctx.shadowColor = '#ffdd88';
-        ctx.shadowBlur = 16;
-      }
+      if (lampOn > 0.02) this._glowDot(x, 428, 22 * lampOn, 'rgba(255,221,136,ALPHA)', 0.5 * lampOn);
+      ctx.fillStyle = `rgba(255,224,150,${0.15 + 0.75 * lampOn})`;
       ctx.beginPath();
       ctx.arc(x, 428, 6, 0, 7);
       ctx.fill();
-      ctx.shadowBlur = 0;
     }
 
     // traffic light
@@ -392,16 +510,16 @@ export class City {
     const colors = ['#ff4d4d', '#ffd23f', '#3fff7a'];
     for (let i = 0; i < 3; i++) {
       const active = s.trafficOn && s.trafficPhase === i;
-      ctx.fillStyle = active ? colors[i] : 'rgba(255,255,255,0.08)';
-      if (active) { ctx.shadowColor = colors[i]; ctx.shadowBlur = 10; }
+      const a = active ? this.glow.trafficOn : 0;
+      ctx.fillStyle = a > 0.02 ? colors[i] : 'rgba(255,255,255,0.08)';
+      if (a > 0.02) this._glowDot(341, 448 + i * 10, 12, colors[i].startsWith('#') ? this._hexToRgbaTemplate(colors[i]) : colors[i], 0.6 * a);
       ctx.beginPath();
       ctx.arc(341, 448 + i * 10, 4, 0, 7);
       ctx.fill();
-      ctx.shadowBlur = 0;
     }
 
     // cars
-    if (s.trafficOn) {
+    if (this.glow.trafficOn > 0.3) {
       for (let i = 0; i < 3; i++) {
         const speed = s.trafficPhase === 2 ? 1 : 0.15;
         const x = ((time * 40 * speed + i * 220) % 760) - 40;
@@ -411,9 +529,15 @@ export class City {
     }
   }
 
+  _hexToRgbaTemplate(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return `rgba(${r},${g},${b},ALPHA)`;
+  }
+
   _drawBridge(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const bridgeOpen = this.display.bridgeOpen;
     ctx.strokeStyle = '#232838';
     ctx.lineWidth = 6;
     ctx.beginPath();
@@ -423,7 +547,7 @@ export class City {
 
     ctx.save();
     ctx.translate(800, 486);
-    ctx.rotate(-s.bridgeOpen * 0.9);
+    ctx.rotate(-bridgeOpen * 0.9);
     ctx.fillStyle = '#3a4258';
     ctx.fillRect(0, -4, 90, 8);
     ctx.restore();
@@ -436,6 +560,12 @@ export class City {
 
     ctx.fillStyle = 'rgba(60,110,200,0.25)';
     ctx.fillRect(680, 494, 300, 6);
+    // gentle water shimmer
+    const shimmer = 0.15 + 0.1 * Math.sin(time * 1.4);
+    ctx.fillStyle = `rgba(140,190,255,${shimmer})`;
+    for (let x = 690; x < 970; x += 40) {
+      ctx.fillRect(x + Math.sin(time + x) * 4, 497, 18, 1.5);
+    }
   }
 
   _drawWeatherStation(time) {
@@ -462,24 +592,24 @@ export class City {
       ctx.lineTo(682, 175);
       ctx.lineTo(662, 230);
       ctx.stroke();
+      this._glowDot(672, 175, 60, 'rgba(255,247,192,ALPHA)', 0.5 * s.lightningFlash);
     }
   }
 
   _drawSirenTower(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const a = this.glow.sirenOn;
     ctx.fillStyle = '#171b26';
     ctx.fillRect(292, 210, 16, 90);
-    ctx.fillStyle = s.sirenOn ? '#ff5c5c' : '#3a2c2c';
-    if (s.sirenOn) { ctx.shadowColor = '#ff5c5c'; ctx.shadowBlur = 14; }
+    if (a > 0.02) this._glowDot(300, 204, 26, 'rgba(255,92,92,ALPHA)', 0.6 * a);
+    ctx.fillStyle = a > 0.02 ? '#ff5c5c' : '#3a2c2c';
     ctx.beginPath();
     ctx.arc(300, 204, 8, 0, 7);
     ctx.fill();
-    ctx.shadowBlur = 0;
-    if (s.sirenOn) {
+    if (a > 0.05) {
       for (let i = 0; i < 2; i++) {
         const r = ((time * 60 + i * 30) % 60);
-        ctx.strokeStyle = `rgba(255,92,92,${clamp(1 - r / 60, 0, 1) * 0.6})`;
+        ctx.strokeStyle = `rgba(255,92,92,${clamp(1 - r / 60, 0, 1) * 0.6 * a})`;
         ctx.beginPath();
         ctx.arc(300, 204, r, 0, 7);
         ctx.stroke();
@@ -489,16 +619,16 @@ export class City {
 
   _drawSecurityTower(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const a = this.glow.securityOn;
     ctx.fillStyle = '#171b26';
     ctx.fillRect(144, 130, 14, 60);
-    if (s.securityOn) {
+    if (a > 0.02) {
       const sweep = Math.sin(time * 1.2) * 0.5;
       ctx.save();
       ctx.translate(151, 130);
       ctx.rotate(sweep);
       const g = ctx.createLinearGradient(0, 0, 0, 220);
-      g.addColorStop(0, 'rgba(180,230,255,0.35)');
+      g.addColorStop(0, `rgba(180,230,255,${0.35 * a})`);
       g.addColorStop(1, 'rgba(180,230,255,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -513,17 +643,18 @@ export class City {
 
   _drawFireBuilding(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const level = this.display.fireLevel;
     ctx.fillStyle = '#171b26';
     ctx.fillRect(580, 300, 56, 160);
-    if (s.fireLevel > 0.02) {
+    if (level > 0.02) {
+      this._glowDot(608, 285, 40 * level, 'rgba(255,140,60,ALPHA)', 0.35 * level);
       for (let i = 0; i < 4; i++) {
         const fx = 590 + i * 12;
         const flick = Math.sin(time * 8 + i) * 4;
-        const h = 26 * s.fireLevel;
+        const h = 26 * level;
         const g = ctx.createLinearGradient(0, 300 - h, 0, 300);
         g.addColorStop(0, 'rgba(255,220,120,0)');
-        g.addColorStop(1, `rgba(255,120,40,${0.8 * s.fireLevel})`);
+        g.addColorStop(1, `rgba(255,120,40,${0.8 * level})`);
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.moveTo(fx, 300);
@@ -536,23 +667,26 @@ export class City {
 
   _drawFactory(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const clear = this.glow.gasClear;
     ctx.fillStyle = '#171b26';
     ctx.fillRect(730, 340, 70, 120);
-    ctx.fillStyle = s.gasClear ? '#3aa15c' : '#2a2f3d';
+    const r = lerp(42, 58, clear), g = lerp(47, 161, clear), b = lerp(61, 92, clear);
+    ctx.fillStyle = `rgb(${r | 0},${g | 0},${b | 0})`;
     ctx.fillRect(745, 330, 10, 14);
     ctx.fillRect(765, 325, 10, 19);
+    if (clear > 0.5) this._glowDot(755, 335, 20, 'rgba(90,220,140,ALPHA)', 0.2);
   }
 
   _drawFountainPark(time) {
     const ctx = this.ctx;
-    const s = this.state;
+    const a = this.glow.fountainOn;
     ctx.strokeStyle = '#233';
     ctx.fillStyle = 'rgba(40,60,50,0.6)';
     ctx.beginPath();
     ctx.ellipse(200, 400, 46, 14, 0, 0, 7);
     ctx.fill();
-    ctx.fillStyle = s.fountainOn ? 'rgba(90,170,220,0.6)' : 'rgba(60,80,90,0.4)';
+    if (a > 0.02) this._glowDot(200, 396, 40, 'rgba(90,170,220,ALPHA)', 0.4 * a);
+    ctx.fillStyle = `rgba(90,170,220,${0.25 + 0.5 * a})`;
     ctx.beginPath();
     ctx.ellipse(200, 396, 24, 8, 0, 0, 7);
     ctx.fill();
@@ -560,13 +694,12 @@ export class City {
 
   _drawStadium(time) {
     const ctx = this.ctx;
-    const s = this.state;
     ctx.strokeStyle = '#2a2f3d';
     ctx.fillStyle = '#171b26';
     ctx.beginPath();
     ctx.ellipse(430, 360, 46, 24, 0, 0, 7);
     ctx.fill();
-    const roof = s.stadiumClosed ? 1 : clamp(0.15, 0, 1);
+    const roof = 0.15 + 0.85 * this.glow.rainOn;
     ctx.fillStyle = 'rgba(120,140,170,0.5)';
     ctx.beginPath();
     ctx.ellipse(430, 356, 44 * roof + 4, 20 * roof + 2, 0, Math.PI, 2 * Math.PI);
@@ -575,14 +708,13 @@ export class City {
 
   _drawRadarHill(time) {
     const ctx = this.ctx;
-    const s = this.state;
     ctx.fillStyle = '#141824';
     ctx.beginPath();
     ctx.ellipse(860, 300, 60, 26, 0, 0, Math.PI);
     ctx.fill();
     ctx.save();
     ctx.translate(860, 274);
-    ctx.rotate(s.radarAngle);
+    ctx.rotate(this.display.radarAngle);
     ctx.strokeStyle = '#5cc8ff';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -622,15 +754,25 @@ export class City {
     ctx.stroke();
   }
 
-  _drawVictoryBanner() {
+  _drawVignette() {
     const ctx = this.ctx;
-    ctx.fillStyle = 'rgba(6,10,18,0.35)';
+    const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.32, W / 2, H / 2, H * 0.85);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(0,0,0,0.38)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  _drawVictoryBanner(time) {
+    const ctx = this.ctx;
+    const pulse = 0.5 + 0.5 * Math.sin(time * 3);
+    ctx.fillStyle = 'rgba(6,10,18,0.3)';
     ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffd76a';
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = 'bold 36px sans-serif';
     ctx.shadowColor = '#ffd76a';
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 16 + pulse * 14;
     ctx.fillText('SHAHAR QUTQARILDI!', W / 2, 60);
     ctx.shadowBlur = 0;
   }

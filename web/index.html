@@ -20,6 +20,7 @@
     </div>
     <div class="conn-controls">
       <span id="conn-status" class="status status-disconnected">Ulanmagan</span>
+      <button id="mute-btn" class="btn btn-ghost" title="Ovozni yoqish/o'chirish">🔊</button>
       <button id="connect-btn" class="btn btn-primary">Arduino ni ulash</button>
       <button id="disconnect-btn" class="btn btn-ghost" disabled>Uzish</button>
       <button id="reset-btn" class="btn btn-ghost btn-danger">Progressni tozalash</button>
@@ -42,6 +43,7 @@
 
     <section class="city-panel">
       <canvas id="city-canvas" width="1000" height="600"></canvas>
+      <div id="cinematic-layer" class="cinematic-layer"></div>
     </section>
 
     <aside class="detail-panel">
@@ -63,6 +65,15 @@
       <div id="serial-log" class="serial-log"></div>
     </aside>
   </main>
+
+  <div id="splash" class="splash">
+    <div class="splash-inner">
+      <div class="splash-meteor">☄️</div>
+      <h2>Nurshahar</h2>
+      <p>Meteor yomg'iri shaharni quvvatsiz qoldirdi.<br />Arduino orqali sxemalarni yig'ib, shaharni birma-bir tiklaysiz.</p>
+      <button id="splash-start" class="btn btn-primary btn-splash">Boshlash</button>
+    </div>
+  </div>
 
   <script type="module" src="src/main.js"></script>
 </body>

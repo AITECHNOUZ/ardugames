@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nurshahar — Arduino orqali shaharni qutqar</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌁</text></svg>" />
+</head>
+<body>
+  <div id="toast"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">⌁</span>
+      <div>
+        <h1 id="story-title">Nurshahar</h1>
+        <p class="brand-sub">Arduino → USB → Chrome: 20 bosqichli hikoya</p>
+      </div>
+    </div>
+    <div class="conn-controls">
+      <span id="conn-status" class="status status-disconnected">Ulanmagan</span>
+      <button id="connect-btn" class="btn btn-primary">Arduino ni ulash</button>
+      <button id="disconnect-btn" class="btn btn-ghost" disabled>Uzish</button>
+      <button id="reset-btn" class="btn btn-ghost btn-danger">Progressni tozalash</button>
+    </div>
+  </header>
+
+  <section class="story-banner">
+    <p id="story-intro"></p>
+    <div class="progress-wrap">
+      <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
+      <span id="progress-label" class="progress-label">0/20 bosqich tugallandi</span>
+    </div>
+  </section>
+
+  <main class="layout">
+    <aside class="stage-panel">
+      <h2 class="panel-title">Bosqichlar</h2>
+      <div id="stage-list" class="stage-list"></div>
+    </aside>
+
+    <section class="city-panel">
+      <canvas id="city-canvas" width="1000" height="600"></canvas>
+    </section>
+
+    <aside class="detail-panel">
+      <h2 id="stage-title" class="panel-title"></h2>
+      <p id="stage-subtitle" class="stage-subtitle"></p>
+
+      <h3 class="section-label">Kerakli qismlar</h3>
+      <ul id="stage-components" class="chip-list"></ul>
+
+      <h3 class="section-label">Ulash bo'yicha ko'rsatma</h3>
+      <ol id="stage-wiring" class="wiring-list"></ol>
+
+      <p id="stage-intro" class="stage-story"></p>
+
+      <button id="simulate-btn" class="btn btn-secondary">Simulyatsiya</button>
+      <p class="sim-hint">Arduino ulanmagan bo'lsa ham, hikoyani sinab ko'rish uchun signalni simulyatsiya qiling.</p>
+
+      <h3 class="section-label">Serial jurnal</h3>
+      <div id="serial-log" class="serial-log"></div>
+    </aside>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

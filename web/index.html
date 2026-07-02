@@ -32,6 +32,7 @@
     <div class="progress-wrap">
       <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
       <span id="progress-label" class="progress-label">0/20 bosqich tugallandi</span>
+      <span id="stars-total" class="stars-total">★ 0/60</span>
     </div>
   </section>
 
@@ -44,11 +45,21 @@
     <section class="city-panel">
       <canvas id="city-canvas" width="1000" height="600"></canvas>
       <div id="cinematic-layer" class="cinematic-layer"></div>
+      <div id="mentor" class="mentor"></div>
     </section>
 
     <aside class="detail-panel">
       <h2 id="stage-title" class="panel-title"></h2>
       <p id="stage-subtitle" class="stage-subtitle"></p>
+
+      <div class="challenge-bar">
+        <p id="challenge-goal" class="challenge-goal"></p>
+        <span id="challenge-timer" class="challenge-timer"></span>
+      </div>
+      <div id="challenge-hold" class="challenge-hold" hidden>
+        <div class="hold-track"><div id="hold-fill" class="hold-fill"></div></div>
+        <span id="hold-label" class="hold-label"></span>
+      </div>
 
       <h3 class="section-label">Kerakli qismlar</h3>
       <ul id="stage-components" class="chip-list"></ul>

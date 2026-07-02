@@ -1,25 +1,29 @@
 import { STAGES } from './stages.js';
 
-const STORAGE_KEY = 'nurshahar_progress_v1';
+const STORAGE_KEY = 'nurshahar_progress_v2';
 
 export class Story {
   constructor() {
-    this.completed = new Set(this._load());
+    const saved = this._load();
+    this.completed = new Set(saved.completed);
+    this.stars = saved.stars;
     this.current = this._firstIncomplete();
   }
 
   _load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      if (!raw) return { completed: [], stars: {} };
+      const parsed = JSON.parse(raw);
+      return { completed: parsed.completed || [], stars: parsed.stars || {} };
     } catch (_) {
-      return [];
+      return { completed: [], stars: {} };
     }
   }
 
   _save() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...this.completed]));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed: [...this.completed], stars: this.stars }));
     } catch (_) {}
   }
 
@@ -37,19 +41,32 @@ export class Story {
     return this.completed.has(id);
   }
 
+  starsFor(id) {
+    return this.stars[id] || 0;
+  }
+
+  totalStars() {
+    return Object.values(this.stars).reduce((sum, v) => sum + v, 0);
+  }
+
   progressRatio() {
     return this.completed.size / STAGES.length;
   }
 
-  markComplete(id) {
-    if (this.completed.has(id)) return false;
+  // Completes a stage and records how many stars (1-3) it earned. Returns
+  // true the first time a stage is completed (used to gate one-shot
+  // celebration effects); re-completing an already-done stage just updates
+  // the star record if the new attempt was better.
+  markComplete(id, stars = 3) {
+    const firstTime = !this.completed.has(id);
     this.completed.add(id);
+    this.stars[id] = Math.max(this.stars[id] || 0, stars);
     this._save();
-    if (id === this.current) {
+    if (firstTime && id === this.current) {
       const next = STAGES.find((st) => st.id === id + 1);
       if (next) this.current = next.id;
     }
-    return true;
+    return firstTime;
   }
 
   setCurrent(id) {
@@ -58,6 +75,7 @@ export class Story {
 
   reset() {
     this.completed.clear();
+    this.stars = {};
     this._save();
     this.current = 1;
   }

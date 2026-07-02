@@ -21,6 +21,8 @@ export const STAGES = [
     title: 'Markaziy nazorat kaliti',
     subtitle: "Tugma bosilganda LED yonadi — shahar boshqaruv markazi qayta ishga tushadi.",
     dashboard: { type: 'boolean', onLabel: 'YONIQ', offLabel: "O'CHIQ" },
+    challenge: { timeLimit: 15, goal: 'Tugmani bosib, LEDni yoqing.' },
+    tip: "Agar LED yonmasa, uni teskari ulagan bo'lishingiz mumkin — uzun oyoq (anod) musbat tomonga ulanadi.",
     components: ['Arduino Uno', '1x Push-button', '1x LED (sariq)', '1x 220Ω rezistor', 'Simlar'],
     wiring: [
       'LED anodini (uzun oyoq) 220Ω rezistor orqali 8-pinga ulang, katodni GND ga.',
@@ -46,6 +48,8 @@ export const STAGES = [
     title: "Yorug'lik boshqaruvi",
     subtitle: 'Potentsiometr bilan LED yorqinligini boshqar — mavze yorug\'ligi shunga mos o\'zgaradi.',
     dashboard: { type: 'analog', min: 0, max: 255, unit: '', label: 'Yorqinlik' },
+    challenge: { timeLimit: 20, holdSec: 3, goal: "Yorqinlikni 80% dan yuqorida kamida 3 soniya ushlab turing." },
+    tip: 'Potentsiometrni asta burang — signal juda tez sakrasa, ba\'zan noto\'g\'ri o\'qilib qolishi mumkin.',
     components: ['Arduino Uno', '1x Potentsiometr (10k)', '1x LED', '1x 220Ω rezistor'],
     wiring: [
       'Potentsiometr chekka oyoqlarini 5V va GND ga, o\'rta oyoqni A0 ga ulang.',
@@ -71,6 +75,8 @@ export const STAGES = [
     title: "Avtomatik ko'cha chirog'i",
     subtitle: "Fotorezistor (LDR) qorong'ilikni sezib, ko'cha chiroqlarini avtomatik yoqadi.",
     dashboard: { type: 'boolean', onLabel: "QORONG'I — YONDI", offLabel: 'YORUG\'' },
+    challenge: { timeLimit: 12, goal: 'LDR ustini yopib, qorong\'ilikni simulyatsiya qiling.' },
+    tip: "LDR va rezistorni joyini almashtirib ulasangiz, natija teskari chiqadi (qorong'ida o'chib, yorug'da yonadi).",
     components: ['Arduino Uno', '1x LDR (fotorezistor)', '1x 10k rezistor', '1x LED'],
     wiring: [
       'LDR va 10kΩ rezistorni kuchlanish bo\'luvchi (voltage divider) sifatida A1 ga ulang.',
@@ -96,6 +102,8 @@ export const STAGES = [
     title: 'Ogohlantirish signali',
     subtitle: "Buzzer orqali shahar sirenasini yoq — meteor yaqinlashayotgani haqida ogohlantirish.",
     dashboard: { type: 'boolean', onLabel: 'SIRENA FAOL', offLabel: 'JIM' },
+    challenge: { timeLimit: 10, goal: 'Tugmani bosib, sirenani yoqing.' },
+    tip: "Passiv buzzer tovush chiqarishi uchun tone() funksiyasi kerak — oddiy HIGH signal bilan u jim turadi.",
     components: ['Arduino Uno', '1x Passiv buzzer', '1x Push-button'],
     wiring: [
       'Buzzer bir oyog\'ini 8-pinga, ikkinchisini GND ga ulang.',
@@ -121,6 +129,8 @@ export const STAGES = [
     title: 'Svetofor tizimi',
     subtitle: "RGB LED qizil-sariq-yashil tartibida yonib, yo'l harakatini boshqaradi.",
     dashboard: { type: 'enum', labels: ['Qizil', 'Sariq', 'Yashil'], colors: ['#ff4d4d', '#ffd23f', '#3fff7a'] },
+    challenge: { timeLimit: 15, goal: 'Kodni yuklab, svetoforni ishga tushiring.' },
+    tip: "Umumiy katodli RGB LEDda rangli oyoq HIGH bo'lganda yonadi — umumiy anodli bo'lsa, aksincha LOW kerak.",
     components: ['Arduino Uno', '1x RGB LED (umumiy katod)', '3x 220Ω rezistor'],
     wiring: [
       'RGB LED ning R,G,B oyoqlarini 220Ω orqali 9,10,11-pinlarga ulang.',
@@ -147,6 +157,8 @@ export const STAGES = [
     title: "Ko'prik darvozasi",
     subtitle: 'Servo motor ko\'prik darvozasini ochadi — kemalar o\'tishi mumkin.',
     dashboard: { type: 'analog', min: 0, max: 180, unit: '°', label: 'Servo burchagi' },
+    challenge: { timeLimit: 20, goal: "Servo burchagini 150° dan yuqoriga olib boring." },
+    tip: 'Servo motorlar ko\'p quvvat tortadi — bir nechta servo bir vaqtda ishlasa, alohida quvvat manbai kerak bo\'lishi mumkin.',
     components: ['Arduino Uno', '1x Servo motor (SG90)', '1x Potentsiometr (ixtiyoriy)'],
     wiring: [
       'Servo signal simini 9-pinga, quvvat va GND ni mos ulang.',
@@ -172,6 +184,8 @@ export const STAGES = [
     title: 'Himoya devori (Shield)',
     subtitle: 'Ultratovush sensor (HC-SR04) masofani o\'lchab, meteor yaqinlashganda himoya maydonini yoqadi.',
     dashboard: { type: 'analog', min: 0, max: 200, unit: 'sm', label: 'Masofa', dangerZone: (v) => v < 15 },
+    challenge: { timeLimit: 18, goal: "Sensor oldiga 15 sm dan yaqin keling." },
+    tip: "HC-SR04 ning TRIG va ECHO pinlarini almashtirib ulamang — ular turli yo'nalishda ishlaydi.",
     components: ['Arduino Uno', '1x HC-SR04 ultratovush sensor'],
     wiring: [
       'VCC→5V, GND→GND, TRIG→7-pin, ECHO→6-pin.',
@@ -199,6 +213,8 @@ export const STAGES = [
     title: 'Xavfsizlik nazorati',
     subtitle: 'PIR harakat sensori odam/harakatni sezganda qo\'riqlash minorasi yoriti sochib boshlaydi.',
     dashboard: { type: 'boolean', onLabel: 'HARAKAT BOR', offLabel: 'TINCH' },
+    challenge: { timeLimit: 15, goal: 'Qo\'lingizni harakatlantirib sensorni sinang.' },
+    tip: 'PIR sensor yoqilgandan keyin barqarorlashishi uchun 30-60 soniya kutish tavsiya etiladi.',
     components: ['Arduino Uno', '1x PIR harakat sensori (HC-SR501)'],
     wiring: [
       'PIR VCC→5V, GND→GND, OUT→4-pin.',
@@ -224,6 +240,8 @@ export const STAGES = [
     title: 'Ob-havo stansiyasi',
     subtitle: 'DHT11 harorat sensori orqali atmosfera holatini kuzatib, chaqmoq bo\'ronini bashorat qil.',
     dashboard: { type: 'analog', min: 0, max: 50, unit: '°C', label: 'Harorat', decimals: 1, dangerZone: (v) => v > 30 },
+    challenge: { timeLimit: 25, goal: "Sensorni isitib, haroratni 30°C dan oshiring." },
+    tip: "DHT11 sensori tez-tez so'rovni yoqtirmaydi — kamida 1-2 soniya oralig'ida o'qing.",
     components: ['Arduino Uno', '1x DHT11 harorat/namlik sensori'],
     wiring: [
       'DHT11 VCC→5V, GND→GND, DATA→2-pin (10kΩ pull-up bilan).',
@@ -250,6 +268,8 @@ export const STAGES = [
     title: 'Zilzila sensori',
     subtitle: 'Tebranish sensori (SW-420) zarba/tebranishni sezib, yer qimirlashini aniqlaydi.',
     dashboard: { type: 'event', label: 'Tebranish kutilmoqda...' },
+    challenge: { timeLimit: 10, goal: 'Sensorni silkiting yoki stolga uring.' },
+    tip: "SW-420 platasidagi kichik vintni burab sezgirlikni sozlash mumkin.",
     components: ['Arduino Uno', '1x SW-420 tebranish (vibration) sensori'],
     wiring: [
       'VCC→5V, GND→GND, DO→3-pin.',
@@ -278,6 +298,8 @@ export const STAGES = [
     title: 'Yong\'in signalizatsiyasi',
     subtitle: "Alanga (flame) sensori yong'inni aniqlaydi — o'chirilgach bino xavfsiz bo'ladi.",
     dashboard: { type: 'boolean', onLabel: 'ALANGA BOR', offLabel: 'XAVFSIZ', dangerWhenOn: true },
+    challenge: { timeLimit: 20, goal: "Avval alanga ko'rsating, so'ng uzoqlashtirib o'chiring." },
+    tip: "Ko'p flame sensorlar oddiy chiroq yorug'iga ham reaksiya berishi mumkin — sinovni xiraroq joyda o'tkazing.",
     components: ['Arduino Uno', '1x Flame/IR alanga sensori', '1x LED (qizil)'],
     wiring: [
       'Sensor VCC→5V, GND→GND, DO→5-pin.',
@@ -303,6 +325,8 @@ export const STAGES = [
     title: 'Gaz oqishi nazorati',
     subtitle: 'MQ-2 gaz/tutun sensori zavod hududidagi gaz oqishini nazorat qiladi va shamollatish tizimini yoqadi.',
     dashboard: { type: 'analog', min: 0, max: 1023, unit: '', label: 'Gaz darajasi', dangerZone: (v) => v > 300 },
+    challenge: { timeLimit: 20, goal: "Havoni tozalab, qiymatni 300 dan pastga tushiring." },
+    tip: "MQ-2 sensori yoqilgach bir necha daqiqa isishi kerak — boshida qiymatlar beqaror bo'ladi.",
     components: ['Arduino Uno', '1x MQ-2 gaz sensori'],
     wiring: [
       'MQ-2 VCC→5V, GND→GND, AOUT→A2.',
@@ -329,6 +353,8 @@ export const STAGES = [
     title: 'Ovozli boshqaruv (favvora)',
     subtitle: 'Ovoz sensori qarsakni eshitib, bog\'dagi favvorani yoqadi.',
     dashboard: { type: 'event', label: 'Qarsak signali' },
+    challenge: { timeLimit: 10, goal: 'Qarsak chalib favvorani yoqing.' },
+    tip: "Ovoz sensoridagi kichik potentsiometrni burab sezgirlikni sozlash mumkin.",
     components: ['Arduino Uno', '1x Ovoz/mikrofon sensori (KY-038 va h.k.)'],
     wiring: [
       'Sensor VCC→5V, GND→GND, DO→4-pin.',
@@ -355,6 +381,8 @@ export const STAGES = [
     title: "Yomg'ir nazorati",
     subtitle: "Yomg'ir sensori suv tomchisini his qilib, stadion tomini yopadi.",
     dashboard: { type: 'boolean', onLabel: "YOMG'IR BOR", offLabel: 'QURUQ' },
+    challenge: { timeLimit: 15, goal: 'Sensorga bir tomchi suv tomizing.' },
+    tip: "Sinovdan so'ng sensor plastinkasini artib quriting — nam qolsa signal noto'g'ri ishlashi mumkin.",
     components: ['Arduino Uno', '1x Yomg\'ir (rain) sensori'],
     wiring: [
       'Sensor VCC→5V, GND→GND, AOUT/DO→A3.',
@@ -381,6 +409,8 @@ export const STAGES = [
     title: 'Xavfsiz eshik (Vault)',
     subtitle: 'Magnit (reed) sensor yordamida markaziy quvvat omboriga eshikni ochasan.',
     dashboard: { type: 'boolean', onLabel: 'OCHIQ', offLabel: 'YOPIQ' },
+    challenge: { timeLimit: 12, goal: "Magnitni uzoqlashtirib eshikni oching." },
+    tip: 'Reed switch juda nozik — uni bukmang, aks holda ichidagi kontakt shishasi sinishi mumkin.',
     components: ['Arduino Uno', '1x Reed switch (magnit sensor)', '1x kichik magnit'],
     wiring: [
       'Reed switch ning bir oyog\'ini 5-pinga, ikkinchisini GND ga ulang (INPUT_PULLUP).',
@@ -406,6 +436,8 @@ export const STAGES = [
     title: 'Radar boshqaruvi',
     subtitle: 'Joystick modul yordamida radar antennasini aylantirib, osmondagi meteorlarni qidir.',
     dashboard: { type: 'analog', min: -90, max: 90, unit: '°', label: 'Radar burchagi' },
+    challenge: { timeLimit: 15, holdSec: 2, goal: "Joystikni chekkaga surib, 2 soniya ushlab turing." },
+    tip: 'Joystick markazda ham nol bermasligi mumkin — kodga kichik kalibrlash (offset) qo\'shish foydali.',
     components: ['Arduino Uno', '1x Joystick modul (KY-023)'],
     wiring: [
       'VRx→A4, VRy→A5 (ixtiyoriy), VCC→5V, GND→GND.',
@@ -431,6 +463,8 @@ export const STAGES = [
     title: 'Uchirish (countdown) taymeri',
     subtitle: "7-segment displey orqali himoya sun'iy yo'ldoshi uchirilishi uchun teskari sanoq boshlanadi.",
     dashboard: { type: 'event', label: 'Countdown' },
+    challenge: { timeLimit: 15, goal: 'Tugmani bosib, teskari sanoqni boshlang.' },
+    tip: "Agar sanoq juda tez ketayotgandek tuyulsa, sketchdagi delay() qiymatini kattalashtiring.",
     components: ['Arduino Uno', '1x 7-segment displey (yoki 4ta LED raqam o\'rnida)', '1x Push-button'],
     wiring: [
       'Tugmani 2-pinga ulang — bosilganda teskari sanoq boshlanadi.',
@@ -463,6 +497,8 @@ export const STAGES = [
     title: 'Masofadan boshqaruv markazi',
     subtitle: 'IR pult yordamida bir nechta shahar tizimini masofadan boshqar.',
     dashboard: { type: 'event', label: 'IR signal' },
+    challenge: { timeLimit: 10, goal: "Pultdan istalgan tugmani bosing." },
+    tip: 'IR pult va qabul qiluvchi orasida to\'g\'ridan-to\'g\'ri ko\'rish chizig\'i bo\'lishi kerak.',
     components: ['Arduino Uno', '1x IR qabul qiluvchi (VS1838B)', '1x IR pult'],
     wiring: [
       'IR qabul qiluvchi VCC→5V, GND→GND, OUT→11-pin.',
@@ -488,6 +524,8 @@ export const STAGES = [
     title: 'Yadro reaktori — ikki kalitli xavfsizlik',
     subtitle: "Ikkita tugma bir vaqtda bosilgandagina reaktor eshigi ochiladi (ikki kishilik xavfsizlik qoidasi).",
     dashboard: { type: 'event', label: 'Kalit holati (A / B)' },
+    challenge: { timeLimit: 15, goal: "Ikkala tugmani bir vaqtda bosing." },
+    tip: '"Bir vaqtda" qat\'iy emas — bir necha o\'n millisekund farq bilan bosilsa ham hisoblanadi.',
     components: ['Arduino Uno', '2x Push-button', '2x LED'],
     wiring: [
       'Birinchi tugma 2-pin, ikkinchi tugma 3-pin (ikkalasi ham INPUT_PULLUP + GND).',
@@ -516,6 +554,8 @@ export const STAGES = [
     title: 'Yakuniy himoya — Shahar yadrosi',
     subtitle: "Barcha sensorlar birlashadi: LDR (meteor yorqinligi), tugma (himoya), buzzer (sirena), servo (himoya darvozasi), RGB (signal) — meteor hujumini birgalikda qaytaring.",
     dashboard: { type: 'event', label: 'Yakuniy ketma-ketlik' },
+    challenge: { timeLimit: 30, goal: "Barcha tizimlarni bir vaqtda ishga tushiring." },
+    tip: "Bu bosqich eng murakkab — avval har bir qismni alohida sinab ko'ring, keyin birlashtiring.",
     components: ['Arduino Uno', '1x LDR', '1x Push-button', '1x Buzzer', '1x Servo', '1x RGB LED', 'Avvalgi barcha qismlar'],
     wiring: [
       "1-19 bosqichlarda yig'ilgan barcha sxemani bitta katta boardga birlashtiring (yoki mavjud ulanishlarni saqlab qoling).",

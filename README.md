@@ -123,6 +123,28 @@ izohda keltirilgan.
 - 9-bosqich `DHT sensor library` (Adafruit), 18-bosqich `IRremote` kutubxonasini
   talab qiladi — ikkalasi ham Arduino IDE Library Manager orqali o'rnatiladi.
 
+## Vercel'ga deploy qilish
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/AITECHNOUZ/ardugames)
+
+Loyiha 100% statik (build qadam yo'q), shuning uchun Vercel'da "Other"
+freymvork sifatida hech qanday sozlashsiz ishlaydi. Repo ildizidagi
+`vercel.json` quyidagini bajaradi:
+
+- `/` — marketing landing page (`site/index.html`)
+- `/web/index.html` — o'yinning o'zi (landing sahifadagi "Boshlash"
+  tugmasi shu yerga olib boradi)
+
+Qo'lda deploy qilish uchun (GitHub orqali import qilmasdan):
+
+```bash
+npx vercel login
+npx vercel --prod
+```
+
+Web Serial faqat HTTPS yoki `localhost`da ishlaydi — Vercel avtomatik HTTPS
+berganligi uchun qo'shimcha sozlash shart emas.
+
 ## Brend
 
 Maskot ("Robo") va logotip `web/src/brand.js` ichida qo'lda chizilgan SVG

@@ -3,6 +3,8 @@
 // opens, and celebrates (or gently encourages) on completion. Pure DOM/CSS,
 // no assets.
 
+import { MASCOT_SVG } from './brand.js';
+
 const CELEBRATIONS_GREAT = [
   "Zo'r ish, muhandis! ★★★",
   'Ajoyib tezlik! Nurshahar senga tayanadi.',
@@ -30,7 +32,7 @@ export class Mentor {
     this.container = container;
     this.minimized = false;
     container.innerHTML = `
-      <button id="mentor-avatar" class="mentor-avatar" title="Yordamchi">🤖</button>
+      <button id="mentor-avatar" class="mentor-avatar" title="Robo — yordamchi">${MASCOT_SVG}</button>
       <div id="mentor-bubble" class="mentor-bubble">
         <p id="mentor-text"></p>
       </div>

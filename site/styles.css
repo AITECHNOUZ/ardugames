@@ -1,0 +1,173 @@
+:root {
+  --bg: #05070c;
+  --panel: #0d111c;
+  --panel-border: #1d2436;
+  --text: #e7ecff;
+  --text-dim: #8b93ab;
+  --accent: #5cc8ff;
+  --accent-2: #ffd76a;
+  --success: #4ee08b;
+  font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: radial-gradient(1400px 700px at 50% -10%, #121a2c 0%, var(--bg) 55%);
+  color: var(--text);
+}
+
+a { color: inherit; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+
+/* ---- nav ---- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: rgba(5, 7, 12, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--panel-border);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+.nav-brand .logo-mark { width: 30px; height: auto; filter: drop-shadow(0 0 8px rgba(92, 200, 255, 0.5)); }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary { background: linear-gradient(135deg, #2a6bff, #5cc8ff); color: #05070c; box-shadow: 0 10px 30px rgba(92, 200, 255, 0.25); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-ghost { background: transparent; border: 1px solid var(--panel-border); color: var(--text); }
+
+/* ---- hero ---- */
+.hero { padding: 64px 0 40px; }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr 1fr; gap: 48px; }
+}
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--accent-2);
+  background: rgba(255, 215, 106, 0.08);
+  border: 1px solid rgba(255, 215, 106, 0.25);
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.hero h1 { font-size: 42px; line-height: 1.12; margin: 0 0 18px; letter-spacing: -0.5px; }
+.hero h1 .accent { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lead { font-size: 16px; color: var(--text-dim); line-height: 1.6; margin: 0 0 26px; max-width: 520px; }
+.hero-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.hero-note { font-size: 12px; color: var(--text-dim); }
+.hero-image {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.hero-image img { display: block; width: 100%; }
+
+/* ---- sections ---- */
+section { padding: 56px 0; }
+.section-kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 0 0 8px; }
+.section-title { font-size: 28px; margin: 0 0 14px; }
+.section-lead { color: var(--text-dim); font-size: 15px; line-height: 1.6; max-width: 640px; margin: 0 0 36px; }
+
+/* ---- how it works ---- */
+.steps { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+.step-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 26px;
+}
+.step-num { font-family: monospace; color: var(--accent); font-size: 13px; margin-bottom: 10px; }
+.step-card h3 { margin: 0 0 8px; font-size: 17px; }
+.step-card p { margin: 0; color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+
+/* ---- feature showcase ---- */
+.features { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 900px) { .features { grid-template-columns: 1fr 1fr; } }
+.feature-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.feature-card img { display: block; width: 100%; background: #05070c; }
+.feature-card .feature-body { padding: 20px 22px; }
+.feature-card h3 { margin: 0 0 6px; font-size: 16px; }
+.feature-card p { margin: 0; color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+
+/* ---- stage grid ---- */
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (min-width: 700px) { .stage-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1000px) { .stage-grid { grid-template-columns: repeat(5, 1fr); } }
+.stage-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.stage-chip .n { font-family: monospace; color: var(--accent); font-size: 11px; }
+.stage-chip .t { color: var(--text-dim); }
+
+/* ---- audience ---- */
+.audience { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 800px) { .audience { grid-template-columns: repeat(3, 1fr); } }
+.audience-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+.audience-card .emoji { font-size: 26px; margin-bottom: 10px; display: block; }
+.audience-card h3 { margin: 0 0 8px; font-size: 16px; }
+.audience-card p { margin: 0; color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+
+/* ---- final CTA ---- */
+.final-cta {
+  text-align: center;
+  background: radial-gradient(600px 300px at 50% 0%, rgba(92, 200, 255, 0.12), transparent);
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 64px 0;
+}
+.final-cta h2 { font-size: 30px; margin: 0 0 14px; }
+.final-cta p { color: var(--text-dim); margin: 0 0 26px; }
+
+/* ---- footer ---- */
+footer { padding: 32px 0; }
+.footer-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.footer-brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.footer-brand .logo-mark { width: 22px; height: auto; }
+.footer-note { color: var(--text-dim); font-size: 12px; }

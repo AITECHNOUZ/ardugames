@@ -11,9 +11,11 @@ tiklaysiz va oxirida shaharni yakuniy meteor hujumidan qutqarasiz.
 
 Har bir bosqichda: **jonli chizilgan ulash sxemasi** (Arduino Uno pinlari bilan),
 **real vaqtdagi sensor ko'rsatkichi** (analog o'lchagich/sparkline, ON/OFF
-indikator yoki signal chiplari — sensor turiga qarab), sintez qilingan
-**ovoz effektlari**, va bosqich tugallanganda shaharning o'sha qismiga
-**kamera yaqinlashadigan** kinematik lavha.
+indikator yoki signal chiplari — sensor turiga qarab), **haqiqiy kod parchasi**
+va uni tushuntiruvchi qisqa bilim tekshiruvi, **maqsad/vaqt + yulduz tizimi**,
+kichik **yordamchi personaj** (Robo), sintez qilingan **ovoz effektlari**, va
+bosqich tugallanganda shaharning o'sha qismiga **kamera yaqinlashadigan**
+kinematik lavha.
 
 ## Qanday ishlaydi
 
@@ -37,16 +39,19 @@ ochilishi kerak.
 
 ## Ishga tushirish
 
-Alohida build vositasi (Vite/webpack) kerak emas — oddiy statik sahifa:
+Alohida build vositasi (Vite/webpack) kerak emas — oddiy statik sahifa.
+Landing (`site/`) o'yin sahifasidagi (`web/`) modullardan foydalanganligi
+uchun serverni **repo ildizidan** ishga tushiring:
 
 ```bash
-cd web
 python3 -m http.server 8080
 # yoki: npx serve .
 ```
 
-So‘ng brauzerda **http://localhost:8080** ochiladi. “Arduino ni ulash”
-tugmasini bosib, mos USB portni tanlang.
+- O'yinning o'zi: **http://localhost:8080/web/**
+- Marketing landing page: **http://localhost:8080/site/**
+
+“Arduino ni ulash” tugmasini bosib, mos USB portni tanlang.
 
 ### Arduino ulanmasdan sinash
 
@@ -67,9 +72,15 @@ web/
   src/diagram.js           Arduino Uno pin xaritasi + komponent kutubxonasi + sxema chizuvchi
   src/dashboard.js         Real vaqtdagi sensor ko'rsatkichi (analog/boolean/enum/event)
   src/audio.js             Web Audio orqali sintez qilingan tovush effektlari
+  src/mentor.js            Yordamchi personaj (Robo): salomlashish, maslahat, tabrik
+  src/brand.js             Maskot va logotip SVG manbalari (yagona brend manba)
   src/serial.js            Web Serial ulanishi va protokolni parslash
-  src/story.js             Progress: qaysi bosqich ochiq/tugallangan (localStorage)
-  src/main.js              Hammasini bog'lovchi UI kodi
+  src/story.js             Progress + yulduzlar: qaysi bosqich ochiq/tugallangan (localStorage)
+  src/main.js              Hammasini bog'lovchi UI kodi, maqsad/vaqt/ball tizimi
+site/
+  index.html               Marketing landing page (o'yindagi src/brand.js va src/stages.js dan foydalanadi)
+  styles.css               Landing sahifa dizayni
+  assets/                  Ilovadan olingan haqiqiy skrinshotlar (Playwright bilan yaratilgan)
 ```
 
 ## 20 bosqich
@@ -111,6 +122,13 @@ izohda keltirilgan.
   `FLAME_ACTIVE_LOW`).
 - 9-bosqich `DHT sensor library` (Adafruit), 18-bosqich `IRremote` kutubxonasini
   talab qiladi — ikkalasi ham Arduino IDE Library Manager orqali o'rnatiladi.
+
+## Brend
+
+Maskot ("Robo") va logotip `web/src/brand.js` ichida qo'lda chizilgan SVG
+sifatida saqlanadi — bitta manba, o'yinda (`mentor.js`) ham, landing
+sahifada (`site/index.html`) ham shu yerdan import qilinadi. Rang palitrasi
+`web/styles.css` dagi `:root` o'zgaruvchilarida (`--accent`, `--accent-2` va h.k.).
 
 ## Kengaytirish
 

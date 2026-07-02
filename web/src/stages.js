@@ -23,6 +23,18 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: 'YONIQ', offLabel: "O'CHIQ" },
     challenge: { timeLimit: 15, goal: 'Tugmani bosib, LEDni yoqing.' },
     tip: "Agar LED yonmasa, uni teskari ulagan bo'lishingiz mumkin — uzun oyoq (anod) musbat tomonga ulanadi.",
+    code: {
+      snippet: 'bool pressed = digitalRead(BUTTON_PIN) == LOW;\ndigitalWrite(LED_PIN, pressed ? HIGH : LOW);',
+      explain: "INPUT_PULLUP rejimida tugma bosilmaganda pin HIGH, bosilganda LOW bo'ladi — shuning uchun holat LOW bilan solishtiriladi.",
+      quiz: {
+        question: 'Nega kod HIGH emas, LOW bilan solishtiryapti?',
+        options: [
+          { label: "Chunki INPUT_PULLUP rejimida tugma bosilganda pin LOW bo'ladi", correct: true },
+          { label: 'Chunki LED har doim LOW bilan yonadi', correct: false },
+          { label: "Bu tasodifiy tanlov, farqi yo'q", correct: false },
+        ],
+      },
+    },
     components: ['Arduino Uno', '1x Push-button', '1x LED (sariq)', '1x 220Ω rezistor', 'Simlar'],
     wiring: [
       'LED anodini (uzun oyoq) 220Ω rezistor orqali 8-pinga ulang, katodni GND ga.',
@@ -50,6 +62,18 @@ export const STAGES = [
     dashboard: { type: 'analog', min: 0, max: 255, unit: '', label: 'Yorqinlik' },
     challenge: { timeLimit: 20, holdSec: 3, goal: "Yorqinlikni 80% dan yuqorida kamida 3 soniya ushlab turing." },
     tip: 'Potentsiometrni asta burang — signal juda tez sakrasa, ba\'zan noto\'g\'ri o\'qilib qolishi mumkin.',
+    code: {
+      snippet: 'int raw = analogRead(POT_PIN);         // 0..1023\nint level = map(raw, 0, 1023, 0, 255);  // 0..255\nanalogWrite(LED_PIN, level);',
+      explain: 'analogRead 10-bitli (0-1023) qiymat qaytaradi, lekin analogWrite PWM uchun faqat 0-255 qabul qiladi — shuning uchun map() bilan qayta o\'lchanadi.',
+      quiz: {
+        question: "Nega analogRead natijasi to'g'ridan-to'g'ri analogWrite'ga berilmaydi?",
+        options: [
+          { label: 'Chunki ikkalasi turli diapazonda ishlaydi (0-1023 va 0-255)', correct: true },
+          { label: 'Chunki analogWrite faqat manfiy sonlarni qabul qiladi', correct: false },
+          { label: 'Bunday qilsa ham bo\'lardi, kodda ortiqcha qatordir', correct: false },
+        ],
+      },
+    },
     components: ['Arduino Uno', '1x Potentsiometr (10k)', '1x LED', '1x 220Ω rezistor'],
     wiring: [
       'Potentsiometr chekka oyoqlarini 5V va GND ga, o\'rta oyoqni A0 ga ulang.',
@@ -77,6 +101,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: "QORONG'I — YONDI", offLabel: 'YORUG\'' },
     challenge: { timeLimit: 12, goal: 'LDR ustini yopib, qorong\'ilikni simulyatsiya qiling.' },
     tip: "LDR va rezistorni joyini almashtirib ulasangiz, natija teskari chiqadi (qorong'ida o'chib, yorug'da yonadi).",
+    code: {
+      snippet: 'int light = analogRead(LDR_PIN);\nbool dark = light < DARK_THRESHOLD;\ndigitalWrite(LED_PIN, dark ? HIGH : LOW);',
+      explain: "LDR qorong'ida yuqori qarshilik ko'rsatadi, shu sababli kuchlanish bo'luvchidagi A1 qiymati pasayadi — past qiymat qorong'ilikni bildiradi.",
+    },
     components: ['Arduino Uno', '1x LDR (fotorezistor)', '1x 10k rezistor', '1x LED'],
     wiring: [
       'LDR va 10kΩ rezistorni kuchlanish bo\'luvchi (voltage divider) sifatida A1 ga ulang.',
@@ -104,6 +132,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: 'SIRENA FAOL', offLabel: 'JIM' },
     challenge: { timeLimit: 10, goal: 'Tugmani bosib, sirenani yoqing.' },
     tip: "Passiv buzzer tovush chiqarishi uchun tone() funksiyasi kerak — oddiy HIGH signal bilan u jim turadi.",
+    code: {
+      snippet: 'if (on) {\n  tone(BUZZER_PIN, 900 + 200 * sin(millis() / 100.0));\n} else {\n  noTone(BUZZER_PIN);\n}',
+      explain: "sin() funksiyasi chastotani doimiy tebranib turishga majbur qiladi — shuning uchun tovush oddiy 'bip' emas, haqiqiy sirenaga o'xshaydi.",
+    },
     components: ['Arduino Uno', '1x Passiv buzzer', '1x Push-button'],
     wiring: [
       'Buzzer bir oyog\'ini 8-pinga, ikkinchisini GND ga ulang.',
@@ -131,6 +163,18 @@ export const STAGES = [
     dashboard: { type: 'enum', labels: ['Qizil', 'Sariq', 'Yashil'], colors: ['#ff4d4d', '#ffd23f', '#3fff7a'] },
     challenge: { timeLimit: 15, goal: 'Kodni yuklab, svetoforni ishga tushiring.' },
     tip: "Umumiy katodli RGB LEDda rangli oyoq HIGH bo'lganda yonadi — umumiy anodli bo'lsa, aksincha LOW kerak.",
+    code: {
+      snippet: 'setColor(true, false, false);   // qizil\ndelay(2000);\nsetColor(false, true, false);   // yashil\ndelay(2000);\nsetColor(true, true, false);    // sariq\ndelay(500);',
+      explain: "Har rang alohida pinga bog'langan — ikkita rangni bir vaqtda HIGH qilish ularni aralashtirib, sariq hosil qiladi.",
+      quiz: {
+        question: 'Sariq rang qanday hosil qilinadi?',
+        options: [
+          { label: 'Qizil va yashil ranglarni bir vaqtda yoqib', correct: true },
+          { label: 'Alohida sariq LED yoqib', correct: false },
+          { label: 'PWM orqali rangni pasaytirib', correct: false },
+        ],
+      },
+    },
     components: ['Arduino Uno', '1x RGB LED (umumiy katod)', '3x 220Ω rezistor'],
     wiring: [
       'RGB LED ning R,G,B oyoqlarini 220Ω orqali 9,10,11-pinlarga ulang.',
@@ -159,6 +203,10 @@ export const STAGES = [
     dashboard: { type: 'analog', min: 0, max: 180, unit: '°', label: 'Servo burchagi' },
     challenge: { timeLimit: 20, goal: "Servo burchagini 150° dan yuqoriga olib boring." },
     tip: 'Servo motorlar ko\'p quvvat tortadi — bir nechta servo bir vaqtda ishlasa, alohida quvvat manbai kerak bo\'lishi mumkin.',
+    code: {
+      snippet: 'int angle = map(raw, 0, 1023, 0, 180);\nbridgeServo.write(angle);',
+      explain: "Servo 0-180 gradus oralig'ida ishlaydi; potentsiometrning xom qiymati map() bilan shu oraliqqa moslashtiriladi.",
+    },
     components: ['Arduino Uno', '1x Servo motor (SG90)', '1x Potentsiometr (ixtiyoriy)'],
     wiring: [
       'Servo signal simini 9-pinga, quvvat va GND ni mos ulang.',
@@ -186,6 +234,10 @@ export const STAGES = [
     dashboard: { type: 'analog', min: 0, max: 200, unit: 'sm', label: 'Masofa', dangerZone: (v) => v < 15 },
     challenge: { timeLimit: 18, goal: "Sensor oldiga 15 sm dan yaqin keling." },
     tip: "HC-SR04 ning TRIG va ECHO pinlarini almashtirib ulamang — ular turli yo'nalishda ishlaydi.",
+    code: {
+      snippet: 'long duration = pulseIn(ECHO_PIN, HIGH, 25000);\nreturn duration * 0.0343 / 2;',
+      explain: "Tovush havoda ~343 m/s tezlikda tarqaladi. ECHO signali borib-qaytgan vaqtni ikkiga bo'lib, masofa hisoblanadi.",
+    },
     components: ['Arduino Uno', '1x HC-SR04 ultratovush sensor'],
     wiring: [
       'VCC→5V, GND→GND, TRIG→7-pin, ECHO→6-pin.',
@@ -215,6 +267,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: 'HARAKAT BOR', offLabel: 'TINCH' },
     challenge: { timeLimit: 15, goal: 'Qo\'lingizni harakatlantirib sensorni sinang.' },
     tip: 'PIR sensor yoqilgandan keyin barqarorlashishi uchun 30-60 soniya kutish tavsiya etiladi.',
+    code: {
+      snippet: 'int state = digitalRead(PIR_PIN) == HIGH ? 1 : 0;',
+      explain: "PIR sensori infra-qizil issiqlik o'zgarishini his qilib, harakat bo'lganda chiqishni HIGH qiladi.",
+    },
     components: ['Arduino Uno', '1x PIR harakat sensori (HC-SR501)'],
     wiring: [
       'PIR VCC→5V, GND→GND, OUT→4-pin.',
@@ -242,6 +298,18 @@ export const STAGES = [
     dashboard: { type: 'analog', min: 0, max: 50, unit: '°C', label: 'Harorat', decimals: 1, dangerZone: (v) => v > 30 },
     challenge: { timeLimit: 25, goal: "Sensorni isitib, haroratni 30°C dan oshiring." },
     tip: "DHT11 sensori tez-tez so'rovni yoqtirmaydi — kamida 1-2 soniya oralig'ida o'qing.",
+    code: {
+      snippet: 'float temp = dht.readTemperature();\nif (!isnan(temp)) {\n  Serial.println(temp, 2);\n}',
+      explain: 'isnan() tekshiruvi muhim — sensor bilan aloqa vaqtincha uzilsa, readTemperature() noto\'g\'ri (NaN) qiymat qaytaradi va uni yubormaslik kerak.',
+      quiz: {
+        question: 'Nega kod isnan(temp) ni tekshiradi?',
+        options: [
+          { label: "Sensor xato o'qishlarni (NaN) yubormaslik uchun", correct: true },
+          { label: 'Haroratni Farengeytga aylantirish uchun', correct: false },
+          { label: 'Bu shart emas, faqat kod chiroyli ko\'rinishi uchun', correct: false },
+        ],
+      },
+    },
     components: ['Arduino Uno', '1x DHT11 harorat/namlik sensori'],
     wiring: [
       'DHT11 VCC→5V, GND→GND, DATA→2-pin (10kΩ pull-up bilan).',
@@ -270,6 +338,10 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'Tebranish kutilmoqda...' },
     challenge: { timeLimit: 10, goal: 'Sensorni silkiting yoki stolga uring.' },
     tip: "SW-420 platasidagi kichik vintni burab sezgirlikni sozlash mumkin.",
+    code: {
+      snippet: 'if (digitalRead(VIBRATION_PIN) == HIGH) {\n  if (now - lastTrigger > DEBOUNCE_MS) {\n    Serial.println("EVT:10:1");\n    lastTrigger = now;\n  }\n}',
+      explain: "Debounce (kutish vaqti) bo'lmasa, bitta tebranish soniyasiga bir necha marta signal yuborib, hodisani sun'iy ko'paytirib yuboradi.",
+    },
     components: ['Arduino Uno', '1x SW-420 tebranish (vibration) sensori'],
     wiring: [
       'VCC→5V, GND→GND, DO→3-pin.',
@@ -300,6 +372,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: 'ALANGA BOR', offLabel: 'XAVFSIZ', dangerWhenOn: true },
     challenge: { timeLimit: 20, goal: "Avval alanga ko'rsating, so'ng uzoqlashtirib o'chiring." },
     tip: "Ko'p flame sensorlar oddiy chiroq yorug'iga ham reaksiya berishi mumkin — sinovni xiraroq joyda o'tkazing.",
+    code: {
+      snippet: 'bool flame = FLAME_ACTIVE_LOW\n  ? (raw == LOW)\n  : (raw == HIGH);',
+      explain: "Ba'zi sensorlar 'teskari mantiq'da ishlaydi (past signal = hodisa bor) — shuning uchun kodda moslash uchun alohida o'zgaruvchi qoldirilgan.",
+    },
     components: ['Arduino Uno', '1x Flame/IR alanga sensori', '1x LED (qizil)'],
     wiring: [
       'Sensor VCC→5V, GND→GND, DO→5-pin.',
@@ -327,6 +403,10 @@ export const STAGES = [
     dashboard: { type: 'analog', min: 0, max: 1023, unit: '', label: 'Gaz darajasi', dangerZone: (v) => v > 300 },
     challenge: { timeLimit: 20, goal: "Havoni tozalab, qiymatni 300 dan pastga tushiring." },
     tip: "MQ-2 sensori yoqilgach bir necha daqiqa isishi kerak — boshida qiymatlar beqaror bo'ladi.",
+    code: {
+      snippet: 'int value = analogRead(GAS_PIN);\nif (abs(value - lastSent) >= 10) {\n  Serial.println(value);\n}',
+      explain: "Har kichik tebranishni yubormaslik uchun faqat qiymat sezilarli o'zgarganda (≥10) signal yuboriladi — Serial portni ortiqcha yuklamaslik uchun.",
+    },
     components: ['Arduino Uno', '1x MQ-2 gaz sensori'],
     wiring: [
       'MQ-2 VCC→5V, GND→GND, AOUT→A2.',
@@ -355,6 +435,10 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'Qarsak signali' },
     challenge: { timeLimit: 10, goal: 'Qarsak chalib favvorani yoqing.' },
     tip: "Ovoz sensoridagi kichik potentsiometrni burab sezgirlikni sozlash mumkin.",
+    code: {
+      snippet: 'if (raw == HIGH && lastRaw == LOW) {\n  Serial.println("EVT:13:1");\n}',
+      explain: "Bu 'edge detection' — signal LOW dan HIGH ga o'tgan aniq lahzani tutadi, shunda bitta qarsak bitta hodisa deb hisoblanadi.",
+    },
     components: ['Arduino Uno', '1x Ovoz/mikrofon sensori (KY-038 va h.k.)'],
     wiring: [
       'Sensor VCC→5V, GND→GND, DO→4-pin.',
@@ -383,6 +467,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: "YOMG'IR BOR", offLabel: 'QURUQ' },
     challenge: { timeLimit: 15, goal: 'Sensorga bir tomchi suv tomizing.' },
     tip: "Sinovdan so'ng sensor plastinkasini artib quriting — nam qolsa signal noto'g'ri ishlashi mumkin.",
+    code: {
+      snippet: 'bool wet = value < WET_THRESHOLD;',
+      explain: "Quruq holatda sensor yuqori qiymat beradi, nam bo'lganda qarshilik pasayib qiymat kamayadi — shuning uchun THRESHOLD dan past bo'lsa 'nam'.",
+    },
     components: ['Arduino Uno', '1x Yomg\'ir (rain) sensori'],
     wiring: [
       'Sensor VCC→5V, GND→GND, AOUT/DO→A3.',
@@ -411,6 +499,10 @@ export const STAGES = [
     dashboard: { type: 'boolean', onLabel: 'OCHIQ', offLabel: 'YOPIQ' },
     challenge: { timeLimit: 12, goal: "Magnitni uzoqlashtirib eshikni oching." },
     tip: 'Reed switch juda nozik — uni bukmang, aks holda ichidagi kontakt shishasi sinishi mumkin.',
+    code: {
+      snippet: 'bool open = digitalRead(REED_PIN) == HIGH;',
+      explain: "INPUT_PULLUP + reed switch: magnit yaqin bo'lsa kontakt yopilib LOW, magnit uzoqlashsa pull-up tufayli HIGH bo'ladi.",
+    },
     components: ['Arduino Uno', '1x Reed switch (magnit sensor)', '1x kichik magnit'],
     wiring: [
       'Reed switch ning bir oyog\'ini 5-pinga, ikkinchisini GND ga ulang (INPUT_PULLUP).',
@@ -438,6 +530,10 @@ export const STAGES = [
     dashboard: { type: 'analog', min: -90, max: 90, unit: '°', label: 'Radar burchagi' },
     challenge: { timeLimit: 15, holdSec: 2, goal: "Joystikni chekkaga surib, 2 soniya ushlab turing." },
     tip: 'Joystick markazda ham nol bermasligi mumkin — kodga kichik kalibrlash (offset) qo\'shish foydali.',
+    code: {
+      snippet: 'int angle = map(raw, 0, 1023, -90, 90);',
+      explain: "Joystik markazda taxminan 512 qiymat beradi — map() buni -90 dan +90 gradusgacha bo'lgan burchakka aylantiradi.",
+    },
     components: ['Arduino Uno', '1x Joystick modul (KY-023)'],
     wiring: [
       'VRx→A4, VRy→A5 (ixtiyoriy), VCC→5V, GND→GND.',
@@ -465,6 +561,10 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'Countdown' },
     challenge: { timeLimit: 15, goal: 'Tugmani bosib, teskari sanoqni boshlang.' },
     tip: "Agar sanoq juda tez ketayotgandek tuyulsa, sketchdagi delay() qiymatini kattalashtiring.",
+    code: {
+      snippet: 'for (int n = 9; n >= 0; n--) {\n  Serial.println(n);\n  delay(700);\n}\nSerial.println("LAUNCH");',
+      explain: "for tsikli 9 dan 0 gacha kamayib boradi (n--), har qadamda 700ms kutadi — shu tarzda teskari sanoq hosil bo'ladi.",
+    },
     components: ['Arduino Uno', '1x 7-segment displey (yoki 4ta LED raqam o\'rnida)', '1x Push-button'],
     wiring: [
       'Tugmani 2-pinga ulang — bosilganda teskari sanoq boshlanadi.',
@@ -499,6 +599,10 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'IR signal' },
     challenge: { timeLimit: 10, goal: "Pultdan istalgan tugmani bosing." },
     tip: 'IR pult va qabul qiluvchi orasida to\'g\'ridan-to\'g\'ri ko\'rish chizig\'i bo\'lishi kerak.',
+    code: {
+      snippet: 'if (IrReceiver.decode()) {\n  Serial.println(IrReceiver.decodedIRData.command);\n  IrReceiver.resume();\n}',
+      explain: 'IrReceiver.resume() chaqirilmasa, kutubxona faqat bitta signalni qabul qilib, keyingilarini e\'tiborsiz qoldiradi.',
+    },
     components: ['Arduino Uno', '1x IR qabul qiluvchi (VS1838B)', '1x IR pult'],
     wiring: [
       'IR qabul qiluvchi VCC→5V, GND→GND, OUT→11-pin.',
@@ -526,6 +630,18 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'Kalit holati (A / B)' },
     challenge: { timeLimit: 15, goal: "Ikkala tugmani bir vaqtda bosing." },
     tip: '"Bir vaqtda" qat\'iy emas — bir necha o\'n millisekund farq bilan bosilsa ham hisoblanadi.',
+    code: {
+      snippet: 'bool a = digitalRead(BUTTON_A_PIN) == LOW;\nbool b = digitalRead(BUTTON_B_PIN) == LOW;\n// ...\n// Brauzerda: reactorOpen = coreKeyA && coreKeyB;',
+      explain: "Arduino ikkala tugmani mustaqil kuzatib, alohida signal yuboradi; ikkalasi ham TRUE ekanini tekshirish brauzer tomonida && operatori bilan amalga oshadi.",
+      quiz: {
+        question: 'Reaktor qachon ochiladi?',
+        options: [
+          { label: 'coreKeyA VA coreKeyB ikkalasi ham true bo\'lganda (&&)', correct: true },
+          { label: 'coreKeyA yoki coreKeyB dan biri true bo\'lsa (||)', correct: false },
+          { label: 'Faqat vaqt tugaganda', correct: false },
+        ],
+      },
+    },
     components: ['Arduino Uno', '2x Push-button', '2x LED'],
     wiring: [
       'Birinchi tugma 2-pin, ikkinchi tugma 3-pin (ikkalasi ham INPUT_PULLUP + GND).',
@@ -556,6 +672,10 @@ export const STAGES = [
     dashboard: { type: 'event', label: 'Yakuniy ketma-ketlik' },
     challenge: { timeLimit: 30, goal: "Barcha tizimlarni bir vaqtda ishga tushiring." },
     tip: "Bu bosqich eng murakkab — avval har bir qismni alohida sinab ko'ring, keyin birlashtiring.",
+    code: {
+      snippet: 'if (stillAlert && stillButton) {\n  Serial.println("EVT:20:VICTORY");\n}',
+      explain: "G'alaba faqat ikkita shart (yorug'lik xavfi VA tugma) ketma-ketlik oxirigacha ham TRUE bo'lib qolsagina qayd etiladi.",
+    },
     components: ['Arduino Uno', '1x LDR', '1x Push-button', '1x Buzzer', '1x Servo', '1x RGB LED', 'Avvalgi barcha qismlar'],
     wiring: [
       "1-19 bosqichlarda yig'ilgan barcha sxemani bitta katta boardga birlashtiring (yoki mavjud ulanishlarni saqlab qoling).",

@@ -36,10 +36,11 @@ body {
 
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-mark {
-  font-size: 28px;
-  color: var(--accent);
-  text-shadow: 0 0 16px var(--accent);
+  display: flex;
+  align-items: center;
+  filter: drop-shadow(0 0 8px rgba(92, 200, 255, 0.5));
 }
+.brand-mark .logo-mark { width: 34px; height: auto; }
 .brand h1 { margin: 0; font-size: 20px; letter-spacing: 0.4px; }
 .brand-sub { margin: 2px 0 0; font-size: 12px; color: var(--text-dim); }
 
@@ -237,7 +238,7 @@ body {
   border-radius: 50%;
   border: 2px solid var(--accent);
   background: radial-gradient(circle at 35% 30%, #1c2740, #0a0e18);
-  font-size: 20px;
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -245,9 +246,11 @@ body {
   box-shadow: 0 0 16px rgba(92, 200, 255, 0.4);
   animation: mentor-bob 2.6s ease-in-out infinite;
   flex-shrink: 0;
+  padding: 0;
 }
-.mentor-avatar.mentor-happy { border-color: var(--success); box-shadow: 0 0 18px rgba(78, 224, 139, 0.5); }
-.mentor-avatar.mentor-alert { border-color: var(--danger); box-shadow: 0 0 18px rgba(255, 92, 92, 0.5); }
+.mentor-avatar .mascot-svg { width: 32px; height: auto; overflow: visible; }
+.mentor-avatar.mentor-happy { color: var(--success); border-color: var(--success); box-shadow: 0 0 18px rgba(78, 224, 139, 0.5); }
+.mentor-avatar.mentor-alert { color: var(--danger); border-color: var(--danger); box-shadow: 0 0 18px rgba(255, 92, 92, 0.5); }
 @keyframes mentor-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
@@ -375,6 +378,53 @@ body {
 
 #wiring-diagram { width: 100%; display: block; background: #05070c; border-radius: 10px; border: 1px solid var(--panel-border); margin-bottom: 10px; }
 .live-dashboard { min-height: 40px; }
+
+.code-panel { display: flex; flex-direction: column; gap: 10px; }
+.code-block {
+  margin: 0;
+  padding: 12px 14px;
+  background: #05070c;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #dfe6ff;
+}
+.tok-keyword { color: #ff9c5c; }
+.tok-number { color: #8effc1; }
+.tok-string { color: #ffd76a; }
+.tok-comment { color: #6b7690; font-style: italic; }
+.code-explain { margin: 0; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+.code-quiz {
+  background: rgba(255, 215, 106, 0.05);
+  border: 1px solid rgba(255, 215, 106, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.code-quiz-q { margin: 0; font-size: 12px; font-weight: 600; color: var(--text); }
+.code-quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  text-align: left;
+  background: #131a2b;
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--accent); }
+.quiz-opt:disabled { cursor: default; opacity: 0.75; }
+.quiz-opt.quiz-correct { border-color: var(--success); background: rgba(78, 224, 139, 0.12); opacity: 1; }
+.quiz-opt.quiz-wrong { border-color: var(--danger); background: rgba(255, 92, 92, 0.12); opacity: 1; }
+.code-quiz-feedback { margin: 0; font-size: 12px; color: var(--accent-2); }
 
 .serial-log {
   margin-top: 8px;

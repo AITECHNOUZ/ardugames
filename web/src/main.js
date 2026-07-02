@@ -7,6 +7,7 @@ import { renderCircuit } from './diagram.js';
 import { CIRCUITS } from './circuits.js';
 import { LiveDashboard } from './dashboard.js';
 import { Mentor } from './mentor.js';
+import { LOGO_MARK_SVG, FAVICON_DATA_URI } from './brand.js';
 
 const canvas = document.getElementById('city-canvas');
 const city = new City(canvas);
@@ -44,10 +45,62 @@ const el = {
   holdFill: document.getElementById('hold-fill'),
   holdLabel: document.getElementById('hold-label'),
   starsTotal: document.getElementById('stars-total'),
+  codePanel: document.getElementById('code-panel'),
 };
+
+function highlightCode(code) {
+  const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc
+    // Single-quoted attributes on purpose: later passes match double-quoted
+    // string literals in the code, and must not also match the class
+    // attributes inserted by earlier passes.
+    .replace(/"([^"]*)"/g, "<span class='tok-string'>\"$1\"</span>")
+    .replace(/(\/\/[^\n]*)/g, "<span class='tok-comment'>$1</span>")
+    .replace(/\b(if|else|for|while|return|bool|int|long|float|void|const)\b/g, "<span class='tok-keyword'>$1</span>")
+    .replace(/\b(\d+(\.\d+)?)\b/g, "<span class='tok-number'>$1</span>");
+}
+
+function renderCodePanel(stage) {
+  const code = stage.code;
+  if (!code) {
+    el.codePanel.innerHTML = '';
+    return;
+  }
+  const quizHtml = code.quiz ? `
+    <div class="code-quiz">
+      <p class="code-quiz-q">🧠 ${code.quiz.question}</p>
+      <div class="code-quiz-options">
+        ${code.quiz.options.map((o) => `<button class="quiz-opt" data-correct="${o.correct}">${o.label}</button>`).join('')}
+      </div>
+      <p class="code-quiz-feedback" hidden></p>
+    </div>` : '';
+  el.codePanel.innerHTML = `
+    <pre class="code-block"><code>${highlightCode(code.snippet)}</code></pre>
+    <p class="code-explain">${code.explain}</p>
+    ${quizHtml}
+  `;
+  if (code.quiz) {
+    const feedbackEl = el.codePanel.querySelector('.code-quiz-feedback');
+    el.codePanel.querySelectorAll('.quiz-opt').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const correct = btn.dataset.correct === 'true';
+        el.codePanel.querySelectorAll('.quiz-opt').forEach((b) => { b.disabled = true; });
+        btn.classList.add(correct ? 'quiz-correct' : 'quiz-wrong');
+        if (!correct) {
+          el.codePanel.querySelector('.quiz-opt[data-correct="true"]').classList.add('quiz-correct');
+        }
+        feedbackEl.hidden = false;
+        feedbackEl.textContent = correct ? "✔ To'g'ri tushundingiz!" : "Deyarli! To'g'ri javob belgilandi.";
+        audio.blip();
+      });
+    });
+  }
+}
 
 el.storyTitle.textContent = STORY_TITLE;
 el.storyIntro.textContent = STORY_INTRO;
+document.getElementById('brand-mark').innerHTML = LOGO_MARK_SVG;
+document.querySelector('link[rel="icon"]').href = FAVICON_DATA_URI;
 
 let link = null;
 let muted = false;
@@ -145,6 +198,7 @@ function renderStagePanel() {
     const circuit = CIRCUITS[stage.id];
     if (circuit) renderCircuit(el.wiringDiagram, circuit);
     dashboard.reset(stage);
+    renderCodePanel(stage);
     attemptStart[stage.id] = Date.now();
     holdSince[stage.id] = null;
     lastRenderedStageId = stage.id;

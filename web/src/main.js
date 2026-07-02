@@ -3,11 +3,15 @@ import { STAGES, STORY_TITLE, STORY_INTRO, getStage } from './stages.js';
 import { SerialLink, parseEventLine } from './serial.js';
 import { Story } from './story.js';
 import { AudioEngine } from './audio.js';
+import { renderCircuit } from './diagram.js';
+import { CIRCUITS } from './circuits.js';
+import { LiveDashboard } from './dashboard.js';
 
 const canvas = document.getElementById('city-canvas');
 const city = new City(canvas);
 const story = new Story();
 const audio = new AudioEngine();
+const dashboard = new LiveDashboard(document.getElementById('live-dashboard'));
 
 const el = {
   connectBtn: document.getElementById('connect-btn'),
@@ -31,6 +35,7 @@ const el = {
   splash: document.getElementById('splash'),
   splashStart: document.getElementById('splash-start'),
   cinematicLayer: document.getElementById('cinematic-layer'),
+  wiringDiagram: document.getElementById('wiring-diagram'),
 };
 
 el.storyTitle.textContent = STORY_TITLE;
@@ -110,6 +115,8 @@ function renderStageList() {
   });
 }
 
+let lastRenderedStageId = null;
+
 function renderStagePanel() {
   const stage = getStage(story.current);
   el.stageTitle.textContent = `${stage.icon} ${String(stage.id).padStart(2, '0')} · ${stage.title}`;
@@ -118,6 +125,15 @@ function renderStagePanel() {
   el.stageWiring.innerHTML = stage.wiring.map((w) => `<li>${w}</li>`).join('');
   el.stageIntro.textContent = story.isCompleted(stage.id) ? stage.story.complete : stage.story.intro;
   el.simulateBtn.textContent = `Simulyatsiya: bosqich ${stage.id} signalini yubor`;
+
+  // Diagram + live dashboard only need a hard reset when the selected stage
+  // actually changes — not on every renderAll() call triggered by an event.
+  if (stage.id !== lastRenderedStageId) {
+    const circuit = CIRCUITS[stage.id];
+    if (circuit) renderCircuit(el.wiringDiagram, circuit);
+    dashboard.reset(stage);
+    lastRenderedStageId = stage.id;
+  }
 }
 
 function renderProgress() {
@@ -170,6 +186,7 @@ function handleEvent(id, payload) {
   stage.parse(payload, city);
   audio.blip();
   playSpecialSfx(stage, payload);
+  dashboard.push(stage, payload);
 
   if (stage.isComplete(city.state) && !story.isCompleted(id)) {
     story.markComplete(id);

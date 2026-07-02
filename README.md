@@ -9,6 +9,12 @@ yonadi, ko‘prik ochiladi, svetofor ishga tushadi, sirena chaladi...
 shaharni quvvatsiz qoldirgan; siz — yosh muhandis — tizimlarni birma-bir
 tiklaysiz va oxirida shaharni yakuniy meteor hujumidan qutqarasiz.
 
+Har bir bosqichda: **jonli chizilgan ulash sxemasi** (Arduino Uno pinlari bilan),
+**real vaqtdagi sensor ko'rsatkichi** (analog o'lchagich/sparkline, ON/OFF
+indikator yoki signal chiplari — sensor turiga qarab), sintez qilingan
+**ovoz effektlari**, va bosqich tugallanganda shaharning o'sha qismiga
+**kamera yaqinlashadigan** kinematik lavha.
+
 ## Qanday ishlaydi
 
 ```
@@ -55,8 +61,12 @@ arduino/                20 ta mustaqil Arduino sketch (.ino), bosqichlar bo'yich
 web/
   index.html             Sahifa skeleti
   styles.css              Premium tungi/neon dizayn
-  src/city.js             Canvas asosidagi "Nurshahar" render dvigateli
+  src/city.js             Canvas asosidagi "Nurshahar" render dvigateli (kamera, glow, ob-havo)
   src/stages.js           20 bosqichning hikoyasi, sxema/ulash ko'rsatmalari va signal ishlov beruvchilari
+  src/circuits.js          Har bosqich uchun ulash sxemasi ma'lumotlari (diagram.js uchun)
+  src/diagram.js           Arduino Uno pin xaritasi + komponent kutubxonasi + sxema chizuvchi
+  src/dashboard.js         Real vaqtdagi sensor ko'rsatkichi (analog/boolean/enum/event)
+  src/audio.js             Web Audio orqali sintez qilingan tovush effektlari
   src/serial.js            Web Serial ulanishi va protokolni parslash
   src/story.js             Progress: qaysi bosqich ochiq/tugallangan (localStorage)
   src/main.js              Hammasini bog'lovchi UI kodi
